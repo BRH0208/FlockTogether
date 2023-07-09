@@ -15,12 +15,8 @@ public class landSetup : MonoBehaviour
 	public TileBase landTile;
 	
     // Generate tells the world to generate to a specific size
-    public void Generate()
+    public void Generate(int maxX, int maxY)
     {
-		// Set Constants
-		int maxX = 340; // Size is currently hardcoded as quite a few things have to change with size
-		int maxY = 340; // TODO: Unhardcode this
-		
 		// How strong should noise be with respect to the distance weights.
 		// Smaller values are less noisy
 		float noiseRatio = 1f;

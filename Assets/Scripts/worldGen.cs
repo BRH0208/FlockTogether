@@ -5,8 +5,13 @@ using UnityEngine.Tilemaps;
 
 public class worldGen : MonoBehaviour
 {
+	// Public basic setup
 	public GameObject GridObj;
-	public TileBase road;
+	public TileBase roadTile;
+	// Configuration variables
+	public int maxX = 340; // Measured in tiles(32 feet)
+	public int maxY = 340;
+	public int seed; 
 	
 	/*
 		We keep track of the current span of layers. 
@@ -18,19 +23,19 @@ public class worldGen : MonoBehaviour
 	*/ 
 	int minHeight = 0;
 	int maxHeight = 0;
-	Hashtable layers; // <int,GameObject>
+	Dictionary<int,GameObject> layers;
 	
     // Called to begin world generation
     void Start()
     {	
-		layers = new Hashtable();
-		Random.InitState(1);
+		layers = new Dictionary<int,GameObject>();
+		Random.InitState(1); // Start the randomizer
 		
 		// Manage layer 0
-        Transform LandLayer = GridObj.transform.Find("LandLayer"); // Find it
+        GameObject LandLayer = GridObj.transform.Find("LandLayer").gameObject; // Find it
 		layers.Add(0,LandLayer); // Store it
 		landSetup setupScript = LandLayer.GetComponent<landSetup>(); // Find the script
-		setupScript.Generate(); // Generate The Land(slow process)
+		setupScript.Generate(maxX,maxY); // Generate The Land(slow process)
 		
 		// Go through all worldgen steps
 		addLayer();
@@ -78,14 +83,17 @@ public class worldGen : MonoBehaviour
 		}
 		// Place it in layers and hirearchy
 		layer.transform.parent = GridObj.transform;
-		layers.Add(layerNum,layer);
+		layers[layerNum] = layer;
 	}
 	
 	// Place one interconnected road system on the island
 	private void createRoads(){
-		layers[1].tilemap;
-		Vector3Int pos = new Vector3Int(i*4,j*4,0);
-		gameObject.GetComponent<Tilemap>().SetTile(pos,landTile);
+		GameObject targetLayer = (GameObject) layers[1];
+		Tilemap targetTilemap = targetLayer.GetComponent<Tilemap>();
+		
+		// Place the first road
+		Vector3Int center = new Vector3Int(maxX/2,maxY/2,0);
+		targetTilemap.SetTile(center,roadTile);
 	}
 	
 	// Place designated building areas next to the roads

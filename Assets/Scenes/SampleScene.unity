@@ -180,7 +180,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: -100
+  m_SortingOrder: -1
   m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
   m_Color: {r: 0.17758395, g: 0.2798362, b: 0.38679248, a: 1}
   m_FlipX: 0
@@ -632,7 +632,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b68e82ae4ca0960428a5bcac8016ed2b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  seaTile: {fileID: 0}
+  landTile: {fileID: 11400000, guid: c8ff0266b1fe1bd46b44641b3461c1f6, type: 2}
 --- !u!1 &831512773
 GameObject:
   m_ObjectHideFlags: 0
@@ -707,6 +707,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c1994a8cb6ca86a4a8bc37c54eeb3218, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  GridObj: {fileID: 831512773}
+  roadTile: {fileID: 11400000, guid: edbef961c0be5b84599f4b1b16c50787, type: 2}
+  maxX: 340
+  maxY: 340
+  seed: 1
 --- !u!4 &1440929910
 Transform:
   m_ObjectHideFlags: 0
@@ -777,9 +782,9 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
-  m_SortingOrder: 1
+  m_SortingLayerID: 1599325269
+  m_SortingLayer: 1
+  m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: f89188c6e6e9d2b4a95e9e30cd65696f, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0

@@ -41,3 +41,6 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: Noise
+    uniqueID: 1599325269
+    locked: 0
