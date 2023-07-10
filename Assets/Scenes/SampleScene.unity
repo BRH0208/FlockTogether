@@ -711,6 +711,8 @@ MonoBehaviour:
   roadTile: {fileID: 11400000, guid: edbef961c0be5b84599f4b1b16c50787, type: 2}
   maxX: 340
   maxY: 340
+  roadMin: 2200
+  roadMax: 2900
   seed: 1
 --- !u!4 &1440929910
 Transform:

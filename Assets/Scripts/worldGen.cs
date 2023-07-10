@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
@@ -11,6 +12,8 @@ public class worldGen : MonoBehaviour
 	// Configuration variables
 	public int maxX = 340; // Measured in tiles(32 feet)
 	public int maxY = 340;
+	public int roadMin = 500;
+	public int roadMax = 700;
 	public int seed; 
 	
 	/*
@@ -21,24 +24,36 @@ public class worldGen : MonoBehaviour
 		-1 would be one story underground
 		-2 would be two stories underground
 	*/ 
+	Dictionary<int,Tilemap> layers;
+	
 	int minHeight = 0;
 	int maxHeight = 0;
-	Dictionary<int,GameObject> layers;
+	
+	// Populated during road generation 
+	// denotes if a spot is a full tile that can support a road
+	bool[,] emptyField;
+	
+	// The sprite for "empty land" found during road generation
+	// Always the sprite at the center of the layer 0 tilemap
+	Sprite openSprite;
 	
     // Called to begin world generation
     void Start()
     {	
-		layers = new Dictionary<int,GameObject>();
+		layers = new Dictionary<int,Tilemap>();
 		Random.InitState(1); // Start the randomizer
 		
 		// Manage layer 0
         GameObject LandLayer = GridObj.transform.Find("LandLayer").gameObject; // Find it
-		layers.Add(0,LandLayer); // Store it
+		layers.Add(0,LandLayer.GetComponent<Tilemap>()); // Store the tilemap(as reference)
 		landSetup setupScript = LandLayer.GetComponent<landSetup>(); // Find the script
 		setupScript.Generate(maxX,maxY); // Generate The Land(slow process)
 		
+		// We must create layer #1 for the roads and first floors manually. 
+		// The rest are added by buildings themselves as needed
+		addLayer(); 
+		
 		// Go through all worldgen steps
-		addLayer();
 		createRoads(); // Start with roads
 		assignPlots(); // Make building plots near roads and assign buildings to them
 		createBuildings(); // Let all buildings place themselves in their plots
@@ -83,17 +98,134 @@ public class worldGen : MonoBehaviour
 		}
 		// Place it in layers and hirearchy
 		layer.transform.parent = GridObj.transform;
-		layers[layerNum] = layer;
+		layers[layerNum] = layer.GetComponent<Tilemap>();
 	}
 	
 	// Place one interconnected road system on the island
 	private void createRoads(){
-		GameObject targetLayer = (GameObject) layers[1];
-		Tilemap targetTilemap = targetLayer.GetComponent<Tilemap>();
+		// Get the tilemaps
+		Tilemap landLayer = (Tilemap) layers[0];
+		Tilemap primaryLayer = (Tilemap) layers[1];
 		
 		// Place the first road
 		Vector3Int center = new Vector3Int(maxX/2,maxY/2,0);
-		targetTilemap.SetTile(center,roadTile);
+		primaryLayer.SetTile(center,roadTile);
+		
+		// We assume the sprite the road is placed on is the sprite that roads go on
+		openSprite = landLayer.GetSprite(center);
+		
+		// The set of all tile positions we could place the next road in. Set is for speed an uniqueness
+		HashSet<Vector2Int> regularExpansion = new HashSet<Vector2Int>();
+		
+		// Add first adjacent cells
+		regularExpansion.Add(new Vector2Int(maxX/2,maxY/2 + 1));
+		regularExpansion.Add(new Vector2Int(maxX/2,maxY/2 - 1));
+		regularExpansion.Add(new Vector2Int(maxX/2 - 1,maxY/2));
+		regularExpansion.Add(new Vector2Int(maxX/2 + 1,maxY/2));
+		
+		// A "priority" set that is drawn from more often than regularExpansion
+		// Used to make more "straight" roads. 
+		// No roads are prioritised at the start
+		HashSet<Vector2Int> priorityExpansion = new HashSet<Vector2Int>();
+		
+		int roadCount = 0;
+		int desiredRoads = Random.Range(roadMin,roadMax);
+ 		float priorityBias = 0.9f; // percent chance of using priority set
+		
+		// We loop until we hit our number of roads
+		// or we run out of positions
+		while(roadCount < desiredRoads && regularExpansion.Count != 0){
+			// Check if we do priority, or normal
+			HashSet<Vector2Int> possiblePositions;
+			if(priorityExpansion.Count != 0 && Random.Range(0.0f,1.0f) < priorityBias){
+				 possiblePositions = priorityExpansion;
+			} else {
+				 possiblePositions = regularExpansion;
+			}
+			 
+			// Find a valid position to place in.
+			bool foundPos = false;
+			Vector2Int pos = new Vector2Int(-1,-1); // used as default, if a tile is placed here we have issues
+			Vector3Int posVec3;
+			while(!foundPos) {
+				// If we don't have positions, if so we just stop
+				if(possiblePositions.Count == 0){
+					 break;
+				}
+				// Pick a position to try
+				pos = possiblePositions.ElementAt(Random.Range(0,possiblePositions.Count));
+				foundPos = false;
+				posVec3 = new Vector3Int(pos.x,pos.y,0); // Tilemaps want 3d vectors
+				 
+				// We don't place roads that are already roads
+				if(landLayer.GetTile(posVec3) == roadTile){
+					possiblePositions.Remove(pos);
+					continue; // try again immedietly
+				}
+				
+				// Ignore positions that are not placeable sprites
+				if(landLayer.GetSprite(posVec3) != openSprite){
+					possiblePositions.Remove(pos);
+					continue;
+				}
+				 
+				// Ignore positions that create invalid tiles(2x2 grids)
+				// Up and Left
+				if(primaryLayer.GetTile(posVec3+Vector3Int.up) == roadTile &&
+					primaryLayer.GetTile(posVec3+Vector3Int.left) == roadTile &&
+					primaryLayer.GetTile(posVec3+Vector3Int.up+Vector3Int.left) == roadTile
+				){
+					possiblePositions.Remove(pos);
+					continue; 
+				}
+				// Up and Right
+				if(primaryLayer.GetTile(posVec3+Vector3Int.up) == roadTile &&
+					primaryLayer.GetTile(posVec3+Vector3Int.right) == roadTile &&
+					primaryLayer.GetTile(posVec3+Vector3Int.up+Vector3Int.right) == roadTile
+				){
+					possiblePositions.Remove(pos);
+					continue; 
+				}
+				// Down and Left
+				if(primaryLayer.GetTile(posVec3+Vector3Int.down) == roadTile &&
+					primaryLayer.GetTile(posVec3+Vector3Int.left) == roadTile &&
+					primaryLayer.GetTile(posVec3+Vector3Int.down+Vector3Int.left) == roadTile
+				){
+					possiblePositions.Remove(pos);
+					continue; 
+				}
+				// Down and Right
+				if(primaryLayer.GetTile(posVec3+Vector3Int.down) == roadTile &&
+					primaryLayer.GetTile(posVec3+Vector3Int.right) == roadTile &&
+					primaryLayer.GetTile(posVec3+Vector3Int.down+Vector3Int.right) == roadTile
+				){
+					possiblePositions.Remove(pos);
+					continue; 
+				}
+				
+				// If there is no problem with this position
+				foundPos = true;	 
+			}
+			// If we could not find a valid position, we give up for now
+			if(foundPos == false){
+				 continue;
+				 // We only continue here. We may not have a position just because we chose
+				 // priority queue and the queue was full of invalid positions
+			}
+			
+			// Place the tile
+			posVec3 = new Vector3Int(pos.x,pos.y,0);
+			primaryLayer.SetTile(posVec3,roadTile);
+			roadCount++;
+			
+			// add the next tiles
+			regularExpansion.Add(new Vector2Int(pos.x,pos.y + 1));
+			regularExpansion.Add(new Vector2Int(pos.x,pos.y - 1));
+			regularExpansion.Add(new Vector2Int(pos.x - 1,pos.y));
+			regularExpansion.Add(new Vector2Int(pos.x + 1,pos.y));
+		}
+		Debug.Log(roadCount + "/" + desiredRoads + " roads");
+		
 	}
 	
 	// Place designated building areas next to the roads
