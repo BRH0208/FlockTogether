@@ -223,6 +223,23 @@ public class worldGen : MonoBehaviour
 			regularExpansion.Add(new Vector2Int(pos.x,pos.y - 1));
 			regularExpansion.Add(new Vector2Int(pos.x - 1,pos.y));
 			regularExpansion.Add(new Vector2Int(pos.x + 1,pos.y));
+			
+			// Make them a priority if they are across from a road(prioritise lines)
+			// Up/Down connecion
+			if (primaryLayer.GetTile(posVec3 + Vector3Int.up) == roadTile) {// If we have Up
+				priorityExpansion.Add(new Vector2Int(pos.x,pos.y - 1)); // We try down
+			} else if(primaryLayer.GetTile(posVec3 + Vector3Int.down) == roadTile) { // If we have Down
+				priorityExpansion.Add(new Vector2Int(pos.x,pos.y + 1)); // We try Up
+			}
+			
+			// Make them a priority if they are across from a road(prioritise lines)
+			// Left/Right connecion
+			if (primaryLayer.GetTile(posVec3 + Vector3Int.right) == roadTile) {// If we have Right
+				priorityExpansion.Add(new Vector2Int(pos.x - 1,pos.y)); // We try Left
+			} else if(primaryLayer.GetTile(posVec3 + Vector3Int.left) == roadTile) { // If we have Left
+				priorityExpansion.Add(new Vector2Int(pos.x + 1,pos.y)); // We try Right
+			}
+			
 		}
 		Debug.Log(roadCount + "/" + desiredRoads + " roads");
 		
