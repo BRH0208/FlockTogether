@@ -158,7 +158,7 @@ public class worldGen : MonoBehaviour
 				posVec3 = new Vector3Int(pos.x,pos.y,0); // Tilemaps want 3d vectors
 				 
 				// We don't place roads that are already roads
-				if(landLayer.GetTile(posVec3) == roadTile){
+				if(primaryLayer.GetTile(posVec3) == roadTile){
 					possiblePositions.Remove(pos);
 					continue; // try again immedietly
 				}
