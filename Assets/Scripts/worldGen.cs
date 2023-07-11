@@ -8,12 +8,17 @@ public class worldGen : MonoBehaviour
 {
 	// Public basic setup
 	public GameObject GridObj;
+	// Some things have to be scaled to the size of the map, this is done in worldgen
+	public GameObject noise;
+	public GameObject ocean;
+	
 	public TileBase roadTile;
+	
 	// Configuration variables
-	public int maxX = 340; // Measured in tiles(32 feet)
-	public int maxY = 340;
-	public int roadMin = 500;
-	public int roadMax = 700;
+	public int maxX = 3200; // Measured in tiles(64 feet)
+	public int maxY = 3200;
+	public float roadRatio = 0.06f;
+	public float roadVariance = 0.2f;
 	public int seed; 
 	
 	/*
@@ -25,9 +30,12 @@ public class worldGen : MonoBehaviour
 		-2 would be two stories underground
 	*/ 
 	Dictionary<int,Tilemap> layers;
+	Dictionary<int,Vector2Int> regionOrigins;
 	
 	int minHeight = 0;
 	int maxHeight = 0;
+	Tilemap landLayer;
+	Tilemap primaryLayer;
 	
 	// Populated during road generation 
 	// denotes if a spot is a full tile that can support a road
@@ -37,11 +45,18 @@ public class worldGen : MonoBehaviour
 	// Always the sprite at the center of the layer 0 tilemap
 	Sprite openSprite;
 	
+	public Sprite debugSprite;
     // Called to begin world generation
     void Start()
     {	
 		layers = new Dictionary<int,Tilemap>();
-		Random.InitState(1); // Start the randomizer
+		Random.InitState(seed); // Start the randomizer
+		
+		// Resize all elements
+		ocean.transform.position = new Vector3(maxX/2, maxY/2, 0);
+		ocean.transform.localScale = new Vector3(maxX, maxY, 0);
+		noise.transform.position = new Vector3(maxX/2, maxY/2, 0);
+		noise.GetComponent<SpriteRenderer>().size = new Vector3(maxX, maxY, 0);
 		
 		// Manage layer 0
         GameObject LandLayer = GridObj.transform.Find("LandLayer").gameObject; // Find it
@@ -52,6 +67,10 @@ public class worldGen : MonoBehaviour
 		// We must create layer #1 for the roads and first floors manually. 
 		// The rest are added by buildings themselves as needed
 		addLayer(); 
+		
+		// We give some layers special names because we use them so much
+		landLayer = (Tilemap) layers[0];
+		primaryLayer = (Tilemap) layers[1];
 		
 		// Go through all worldgen steps
 		createRoads(); // Start with roads
@@ -103,10 +122,6 @@ public class worldGen : MonoBehaviour
 	
 	// Place one interconnected road system on the island
 	private void createRoads(){
-		// Get the tilemaps
-		Tilemap landLayer = (Tilemap) layers[0];
-		Tilemap primaryLayer = (Tilemap) layers[1];
-		
 		// Place the first road
 		Vector3Int center = new Vector3Int(maxX/2,maxY/2,0);
 		primaryLayer.SetTile(center,roadTile);
@@ -129,8 +144,9 @@ public class worldGen : MonoBehaviour
 		HashSet<Vector2Int> priorityExpansion = new HashSet<Vector2Int>();
 		
 		int roadCount = 0;
-		int desiredRoads = Random.Range(roadMin,roadMax);
- 		float priorityBias = 0.9f; // percent chance of using priority set
+		float tileCount = (float) (maxX * maxY);
+		int desiredRoads = (int) Random.Range((int) (tileCount * roadRatio * (1.0f - roadVariance)),(int) (tileCount * roadRatio * (1.0f + roadVariance)));
+ 		float priorityBias = 0.95f; // percent chance of using priority set
 		
 		// We loop until we hit our number of roads
 		// or we run out of positions
@@ -245,9 +261,96 @@ public class worldGen : MonoBehaviour
 		
 	}
 	
-	// Place designated building areas next to the roads
+	// Divide the map into navicable blocks
 	private void assignPlots(){
+		int[,] ownership = new int[maxX,maxY];
+		regionOrigins = new Dictionary<int,Vector2Int>();
+		int currentIndex = 1;
+		Vector3Int posVec3;
+		for(int x = 0; x < maxX; x++){
+			for(int y = 0; y < maxY; y++){
+				posVec3 = new Vector3Int(x,y,0); // Tilemaps want 3d vectors
+				if(primaryLayer.GetTile(posVec3) != roadTile && ownership[x,y] == 0 && landLayer.GetSprite(posVec3) == openSprite){
+					if(!fillPlot(ownership,x,y,currentIndex)){
+						regionOrigins.Add(currentIndex,new Vector2Int(x,y));
+						currentIndex++;
+					}
+				}
+			}
+		}
 		
+		List<Color> colors = new List<Color>();
+		for(int i = 0; i <= currentIndex; i++){
+			colors.Add(new Color(
+			Random.Range(0.0f,1.0f),
+			Random.Range(0.0f,1.0f),
+			Random.Range(0.0f,1.0f),
+			1.0f));
+		}
+		
+		// For debugging, we add colors to clumps. This is slow for large sizes
+		// Only use on small map sizes(300x300 or smaller)
+		
+		List<GameObject> tempobjects = new List<GameObject>();
+		for(int x = 0; x < maxX; x++){
+			for(int y = 0; y < maxY; y++){
+				if(ownership[x,y] > 0){
+					Vector3 pos = new Vector3(x+0.5f,y+0.5f,0);
+					//spawn object
+					GameObject objToSpawn = new GameObject("tempcolor:"+ownership[x,y]);
+					//Add Components
+					objToSpawn.AddComponent<SpriteRenderer>();
+					objToSpawn.transform.position = pos;
+					objToSpawn.GetComponent<SpriteRenderer>().sprite = debugSprite;
+					objToSpawn.GetComponent<SpriteRenderer>().color = colors[ownership[x,y]];
+					tempobjects.Add(objToSpawn);
+				}
+			}
+		}
+		
+		Debug.Log(currentIndex);
+	}
+	
+	// Starting at a position claim all available connected positions
+	// A recursive helper for assignPlots
+	private bool fillPlot(int[,] ownership,int x, int y, int ownervalue, int depth = 0){
+		// Base case
+		Vector3Int posVec3 = new Vector3Int(x,y,0);
+		if(depth > 500 || ownership[x,y] == -1){
+			return true;
+		}
+		// We stop on roads, claimed tiles and non-open land tiles
+		if(primaryLayer.GetTile(posVec3) == roadTile || ownership[x,y] > 0 || landLayer.GetSprite(posVec3) != openSprite){
+			return false;
+		}
+		
+		// Actually claim the tile
+		ownership[x,y] = ownervalue;
+		
+		// Recurse up
+		if(fillPlot(ownership, x, y+1, ownervalue, depth + 1)){
+			ownership[x,y] = -1;
+			return true;
+		}
+		
+		// Recurse left
+		if(fillPlot(ownership, x-1, y, ownervalue, depth + 1)){
+			ownership[x,y] = -1;
+			return true;
+		}
+		
+		// Recurse down
+		if(fillPlot(ownership, x, y-1, ownervalue, depth + 1)){
+			ownership[x,y] = -1;
+			return true;
+		}
+		
+		// Recurse right
+		if(fillPlot(ownership, x+1, y, ownervalue, depth + 1)){
+			ownership[x,y] = -1;
+			return true;
+		}
+		return false;
 	}
 	
 	// Place 

@@ -60,7 +60,7 @@ public class landSetup : MonoBehaviour
 			}
 		}
 		
-		Debug.Log(count + " tiles placed, " + (count)/27225f + " square miles" );
+		Debug.Log(count + " tiles placed, " + (count)/6806.25f + " square miles" );
 		
     }
 
