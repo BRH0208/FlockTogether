@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
@@ -11,8 +12,10 @@ public class worldGen : MonoBehaviour
 	// Some things have to be scaled to the size of the map, this is done in worldgen
 	public GameObject noise;
 	public GameObject ocean;
+	public GameObject camera;
 	
 	public TileBase roadTile;
+	public TileBase landTile;
 	
 	// Configuration variables
 	public int maxX = 3200; // Measured in tiles(64 feet)
@@ -31,6 +34,7 @@ public class worldGen : MonoBehaviour
 	*/ 
 	Dictionary<int,Tilemap> layers;
 	Dictionary<int,Vector2Int> regionOrigins;
+	HashSet<Vector2Int> roadPositions;
 	
 	int minHeight = 0;
 	int maxHeight = 0;
@@ -46,23 +50,29 @@ public class worldGen : MonoBehaviour
 	Sprite openSprite;
 	
 	public Sprite debugSprite;
+	
+	void Start(){
+		Debug.Log("Loading Complete");
+		StartCoroutine(Generate());
+	}
+	
     // Called to begin world generation
-    void Start()
+    IEnumerator Generate()
     {	
+		Debug.Log("Generation Called");
 		layers = new Dictionary<int,Tilemap>();
 		Random.InitState(seed); // Start the randomizer
 		
-		// Resize all elements
+		// Resize and resposition all elements
 		ocean.transform.position = new Vector3(maxX/2, maxY/2, 0);
 		ocean.transform.localScale = new Vector3(maxX, maxY, 0);
 		noise.transform.position = new Vector3(maxX/2, maxY/2, 0);
 		noise.GetComponent<SpriteRenderer>().size = new Vector3(maxX, maxY, 0);
+		camera.transform.position = new Vector3(maxX/2, maxY/2, -1);
 		
 		// Manage layer 0
         GameObject LandLayer = GridObj.transform.Find("LandLayer").gameObject; // Find it
 		layers.Add(0,LandLayer.GetComponent<Tilemap>()); // Store the tilemap(as reference)
-		landSetup setupScript = LandLayer.GetComponent<landSetup>(); // Find the script
-		setupScript.Generate(maxX,maxY); // Generate The Land(slow process)
 		
 		// We must create layer #1 for the roads and first floors manually. 
 		// The rest are added by buildings themselves as needed
@@ -72,15 +82,113 @@ public class worldGen : MonoBehaviour
 		landLayer = (Tilemap) layers[0];
 		primaryLayer = (Tilemap) layers[1];
 		
-		// Go through all worldgen steps
-		createRoads(); // Start with roads
-		assignPlots(); // Make building plots near roads and assign buildings to them
+		Debug.Log("Basic steps complete");
+		yield return null;
+		
+		// Go through all worldgen steps, each asynchronous
+		yield return StartCoroutine(createIsland()); // Place the island
+		yield return null;
+		
+		yield return StartCoroutine(createRoads()); // Place major(4 lane) roads
+		yield return null;
+		
+		yield return StartCoroutine(assignPlots()); // Make building plots near roads and assign buildings to them
+		yield return null;
+		
 		createBuildings(); // Let all buildings place themselves in their plots
 		createOtherTiles(); // Add all tiles not placed on roads
 		bakeStatics(); // Bake in movement and collisions
 		createDyanmics(); // Place dynamic object
 		createUndead(); // Populate with initial undead
     }
+	
+	// Tells the world to generate to a specific size
+    IEnumerator createIsland()
+    {
+		// How strong should noise be with respect to the distance weights.
+		// Smaller values are less noisy
+		float noiseRatio = 1f;
+		// Affects the size of the noise. Larger values result in smaller "bumps"
+		float noiseScale = 8f;
+		
+		// We count the number of tiles so they can be logged
+		int count = 0;
+		landLayer.ClearAllTiles();
+		
+		// Regular World Generation
+		float perlinOffsetX = Random.Range(-65536,65536);
+		float perlinOffsetY = Random.Range(-65536,65536);
+		
+		// Loop over all tiles
+		for(int x = 0; x < maxX; x++){
+			if(x % 5 == 0){
+				yield return null; // Every 100 lines we rest
+			}
+			for(int y = 0; y < maxY; y++){
+				
+				// Get base perlin noise(Big clumps)
+				float noise = Mathf.PerlinNoise(
+					((float) x) / maxX * noiseScale + perlinOffsetX,
+					((float) y) / maxY * noiseScale + perlinOffsetY);
+				// noise = Mathf.Clamp(noise,0f,1f); // This is approximatly true, removed for effeciency
+				
+				// Get weight factor for distance
+				float distance = (Vector2.Distance(
+					new Vector2(0.5f,0.5f), // From the center
+					new Vector2((float) x / maxX, (float) y / maxY) // To the position(normalised)
+					)) * 2 - 1; // We adjust the range to be [-1,0]
+				// distance = Mathf.Clamp(distance,-1f,1f); // Distance is clamped to this
+				
+				// We measure our noise to zero, < 0 is land, > 0 is water
+				if(distance + noiseRatio * noise < 0){
+					// Place a land tile
+					Vector3Int pos = new Vector3Int(x,y,0);
+					landLayer.SetTile(pos,landTile);
+					
+					// Add this tile to the count
+					count++;
+				}
+			}
+		}
+		
+		Debug.Log(count + " tiles placed, " + (count)/6806.25f + " square miles" );
+		
+    }
+
+    // A test world for making sure all land tiles can be placed
+	// Places every possible 3x3 grid of tiles in sequence
+	// So long as there is a sprite for all the tiles placed in the test, 
+	// we have enough sprites for the game
+	void drawTest(){
+		int count = 0;
+		
+		// There are 256 possibilites, we represent them in a grid
+		for(int i = 0; i < 16; i++){
+			for(int j = 0; j < 16; j++){
+				// Place "center" position always
+				count++;
+				Vector3Int pos = new Vector3Int(i*4,j*4,0);
+				landLayer.SetTile(pos,landTile);
+				
+				// For all other positions in a 3x3 grid around the center tile, maybe place tiles
+				int subCount = 1; // The current multiple of the count used to determine placement
+				for(int x = -1; x <= 1; x++){
+					for(int y = -1; y <= 1; y++){
+						if(x == 0 && y == 0){
+							continue; // we ignore the center tile(it was already placed)
+						}
+						
+						subCount *= 2;
+						if(count % subCount < subCount / 2){ // This pattern iterates through possibilities
+							// If a tile should be made, place it
+							pos = new Vector3Int(i*4 + x,j*4 + y,0);
+							landLayer.SetTile(pos,landTile);
+						}
+					}
+				}
+			}
+		}
+	}
 	
 	/* 
 		Add a new tilemap layer to the game. 
@@ -121,7 +229,7 @@ public class worldGen : MonoBehaviour
 	}
 	
 	// Place one interconnected road system on the island
-	private void createRoads(){
+	private IEnumerator createRoads(){
 		// Place the first road
 		Vector3Int center = new Vector3Int(maxX/2,maxY/2,0);
 		primaryLayer.SetTile(center,roadTile);
@@ -151,6 +259,10 @@ public class worldGen : MonoBehaviour
 		// We loop until we hit our number of roads
 		// or we run out of positions
 		while(roadCount < desiredRoads && regularExpansion.Count != 0){
+			// Allow for an asynch break at the middle
+			if(roadCount == desiredRoads / 2){
+				yield return null;
+			}
 			// Check if we do priority, or normal
 			HashSet<Vector2Int> possiblePositions;
 			if(priorityExpansion.Count != 0 && Random.Range(0.0f,1.0f) < priorityBias){
@@ -257,28 +369,138 @@ public class worldGen : MonoBehaviour
 			}
 			
 		}
+		roadPositions = regularExpansion; // We save the road positions for later
+		
 		Debug.Log(roadCount + "/" + desiredRoads + " roads");
 		
 	}
 	
 	// Divide the map into navicable blocks
-	private void assignPlots(){
+	private IEnumerator assignPlots(){
+		// This designates which plot owns each tile(by index)
 		int[,] ownership = new int[maxX,maxY];
+		
+		// We keep track of one tile in each region so we can find the regions later
 		regionOrigins = new Dictionary<int,Vector2Int>();
-		int currentIndex = 1;
+		
+		int currentIndex = 1; // What is the current highest ownership value 
 		Vector3Int posVec3;
-		for(int x = 0; x < maxX; x++){
-			for(int y = 0; y < maxY; y++){
+		
+		// Region creation by flood filling
+		// This works well on wierd, but closed shapes
+		for (int x = 0; x < maxX; x++){
+			for (int y = 0; y < maxY; y++){
+				// We try to "fill on each tile"
 				posVec3 = new Vector3Int(x,y,0); // Tilemaps want 3d vectors
-				if(primaryLayer.GetTile(posVec3) != roadTile && ownership[x,y] == 0 && landLayer.GetSprite(posVec3) == openSprite){
-					if(!fillPlot(ownership,x,y,currentIndex)){
-						regionOrigins.Add(currentIndex,new Vector2Int(x,y));
-						currentIndex++;
-					}
+				
+				if(!fillPlot(ownership,x,y,currentIndex)){
+					// If the fill returned false, then we know a region was made. 
+					regionOrigins.Add(currentIndex,new Vector2Int(x,y)); // Keep track of the new region
+					currentIndex++; // The next region will have an index 1 higher
 				}
 			}
 		}
 		
+		// We let the operation take a break
+		yield return null;
+		
+		// Region creation by road following
+		// This works best for open areas without strange obstacles
+		int expandDisMax = 75;
+		
+		foreach (Vector2Int pos in roadPositions) {
+			posVec3 = new Vector3Int(pos.x,pos.y,0);
+			
+			if (validOpen(ownership,pos.x,pos.y)) {
+				// We try to find out if we are a straight road.
+				// If we are in a corner between roads we do nothing
+				bool foundDirection = true; // We default to true, but it is set to false in the else blcok
+				Vector3Int anchorDir = Vector3Int.zero; // The direction of the road we are "hooked" to
+				Vector3Int leftDir = Vector3Int.zero; // A direction perpendicular to the road direction, either is valid
+				
+				// If we are down anchored
+				if (primaryLayer.GetTile(posVec3 + Vector3Int.down) == roadTile 
+					&& primaryLayer.GetTile(posVec3 + Vector3Int.left) != roadTile
+					&& primaryLayer.GetTile(posVec3 + Vector3Int.right) != roadTile)
+				{
+					anchorDir = Vector3Int.down;
+					leftDir = Vector3Int.left;
+					
+					// Sometimes we are in a tunnel, this case is handled seperatly
+					if(primaryLayer.GetTile(posVec3 + Vector3Int.up) == roadTile && Random.Range(0.0f,1.0f) < 0.5f){
+						anchorDir = Vector3Int.up;
+					}
+				} 
+				// If we are left anchored
+				else if (primaryLayer.GetTile(posVec3 + Vector3Int.left) == roadTile 
+					&& primaryLayer.GetTile(posVec3 + Vector3Int.up) != roadTile
+					&& primaryLayer.GetTile(posVec3 + Vector3Int.down) != roadTile)
+				{
+					anchorDir = Vector3Int.left;
+					leftDir = Vector3Int.up;
+					
+					// Case for vertical tunnels
+					if(primaryLayer.GetTile(posVec3 + Vector3Int.right) == roadTile && Random.Range(0.0f,1.0f) < 0.5f){
+						anchorDir = Vector3Int.right;
+					}
+				}
+				// If we are right anchored
+				else if (primaryLayer.GetTile(posVec3 + Vector3Int.right) == roadTile 
+					&& primaryLayer.GetTile(posVec3 + Vector3Int.up) != roadTile
+					&& primaryLayer.GetTile(posVec3 + Vector3Int.down) != roadTile)
+				{
+					anchorDir = Vector3Int.right;
+					leftDir = Vector3Int.up;
+				}
+				// If we are up anchored
+				else if (primaryLayer.GetTile(posVec3 + Vector3Int.up) == roadTile 
+					&& primaryLayer.GetTile(posVec3 + Vector3Int.left) != roadTile
+					&& primaryLayer.GetTile(posVec3 + Vector3Int.right) != roadTile)
+				{
+					anchorDir = Vector3Int.up;
+					leftDir = Vector3Int.right;
+				} else {
+					foundDirection = false;
+				}
+				
+				// If we did find our direction
+				if (foundDirection) {
+					// expand left(and center)
+					for (int roadOffset = 0; 
+						primaryLayer.GetTile(posVec3  + leftDir * roadOffset + anchorDir) == roadTile // Must have a road in anchoring direction
+						&& validOpen(ownership, pos.x - roadOffset * leftDir.x,pos.y - roadOffset * leftDir.y); // Must have atleast 1 open tile in front
+						roadOffset++){
+						// For all positions along the road, we want to expend upto 50 units up(where allowed)
+						for(int expandOffset = 0;
+							expandOffset < expandDisMax
+							&& validOpen(ownership, pos.x - roadOffset * leftDir.x - expandOffset * anchorDir.x,pos.y - roadOffset * leftDir.y - expandOffset * anchorDir.y);
+							expandOffset++
+						){
+							ownership[pos.x - roadOffset * leftDir.x - expandOffset * anchorDir.x,pos.y - roadOffset * leftDir.y - expandOffset * anchorDir.y] = currentIndex;
+						}
+					}
+					// expand right
+					for (int roadOffset = -1; 
+						primaryLayer.GetTile(posVec3  + leftDir * roadOffset + anchorDir) == roadTile // Must have a road in anchoring direction
+						&& validOpen(ownership, pos.x - roadOffset * leftDir.x,pos.y - roadOffset * leftDir.y); // Must have atleast 1 open tile in front
+						roadOffset--){
+						for(int expandOffset = 0;
+							expandOffset < expandDisMax
+							&& validOpen(ownership, pos.x - roadOffset * leftDir.x - expandOffset * anchorDir.x,pos.y - roadOffset * leftDir.y - expandOffset * anchorDir.y);
+							expandOffset++
+						){
+							ownership[pos.x - roadOffset * leftDir.x - expandOffset * anchorDir.x,pos.y - roadOffset * leftDir.y - expandOffset * anchorDir.y] = currentIndex;
+						}
+					}
+					currentIndex++;
+				}
+			}
+		}
+		
+		
+		// For debugging, we add colors to clumps. This is slow for large sizes
+		// Only use on small map sizes(300x300 or smaller)
+		/*
 		List<Color> colors = new List<Color>();
 		for(int i = 0; i <= currentIndex; i++){
 			colors.Add(new Color(
@@ -288,9 +510,7 @@ public class worldGen : MonoBehaviour
 			1.0f));
 		}
 		
-		// For debugging, we add colors to clumps. This is slow for large sizes
-		// Only use on small map sizes(300x300 or smaller)
-		
+
 		List<GameObject> tempobjects = new List<GameObject>();
 		for(int x = 0; x < maxX; x++){
 			for(int y = 0; y < maxY; y++){
@@ -307,50 +527,77 @@ public class worldGen : MonoBehaviour
 				}
 			}
 		}
-		
-		Debug.Log(currentIndex);
+		*/
+		Debug.Log(currentIndex + " regions created");
 	}
 	
+	List<Vector2Int> trackedELem;
 	// Starting at a position claim all available connected positions
 	// A recursive helper for assignPlots
 	private bool fillPlot(int[,] ownership,int x, int y, int ownervalue, int depth = 0){
+		if(depth == 0){
+			trackedELem = new List<Vector2Int>();
+		}
+		
 		// Base case
 		Vector3Int posVec3 = new Vector3Int(x,y,0);
-		if(depth > 500 || ownership[x,y] == -1){
+		if(depth > 750 || ownership[x,y] == -1){
 			return true;
 		}
 		// We stop on roads, claimed tiles and non-open land tiles
-		if(primaryLayer.GetTile(posVec3) == roadTile || ownership[x,y] > 0 || landLayer.GetSprite(posVec3) != openSprite){
-			return false;
+		if(!validOpen(ownership,x,y,0)){
+			return depth == 0;
 		}
 		
 		// Actually claim the tile
 		ownership[x,y] = ownervalue;
+		trackedELem.Add(new Vector2Int(x,y));
+		
 		
 		// Recurse up
 		if(fillPlot(ownership, x, y+1, ownervalue, depth + 1)){
-			ownership[x,y] = -1;
+			while (trackedELem.Count != 0){
+				ownership[trackedELem[0].x,trackedELem[0].y] = -1;
+				trackedELem.RemoveAt(0);
+			}
 			return true;
 		}
 		
 		// Recurse left
 		if(fillPlot(ownership, x-1, y, ownervalue, depth + 1)){
-			ownership[x,y] = -1;
+			while (trackedELem.Count != 0){
+				ownership[trackedELem[0].x,trackedELem[0].y] = -1;
+				trackedELem.RemoveAt(0);
+			}
 			return true;
 		}
 		
 		// Recurse down
 		if(fillPlot(ownership, x, y-1, ownervalue, depth + 1)){
-			ownership[x,y] = -1;
+			while (trackedELem.Count != 0){
+				ownership[trackedELem[0].x,trackedELem[0].y] = -1;
+				trackedELem.RemoveAt(0);
+			}
 			return true;
 		}
 		
 		// Recurse right
 		if(fillPlot(ownership, x+1, y, ownervalue, depth + 1)){
-			ownership[x,y] = -1;
+			while (trackedELem.Count != 0){
+				ownership[trackedELem[0].x,trackedELem[0].y] = -1;
+				trackedELem.RemoveAt(0);
+			}
 			return true;
 		}
 		return false;
+	}
+	
+	// Is a specific area claimed with a specific region, not a road and not coast/water?
+	private bool validOpen(int[,] ownership,int x, int y, int ownershipValue = -1) {
+		Vector3Int posVec3 = new Vector3Int(x,y,0);
+		return ownership[x,y] == ownershipValue && // Only for specific region flags
+			primaryLayer.GetTile(posVec3) != roadTile && // Not a road
+			landLayer.GetSprite(posVec3) == openSprite; // open grass
 	}
 	
 	// Place 

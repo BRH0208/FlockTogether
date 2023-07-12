@@ -218,7 +218,6 @@ GameObject:
   - component: {fileID: 562379126}
   - component: {fileID: 562379128}
   - component: {fileID: 562379127}
-  - component: {fileID: 562379129}
   m_Layer: 0
   m_Name: LandLayer
   m_TagString: Untagged
@@ -582,19 +581,6 @@ Tilemap:
     e31: 0
     e32: 0
     e33: 1
---- !u!114 &562379129
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 562379125}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b68e82ae4ca0960428a5bcac8016ed2b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  landTile: {fileID: 11400000, guid: c8ff0266b1fe1bd46b44641b3461c1f6, type: 2}
 --- !u!1 &831512773
 GameObject:
   m_ObjectHideFlags: 0
@@ -672,7 +658,9 @@ MonoBehaviour:
   GridObj: {fileID: 831512773}
   noise: {fileID: 2021202999}
   ocean: {fileID: 443628042}
+  camera: {fileID: 1750464618}
   roadTile: {fileID: 11400000, guid: edbef961c0be5b84599f4b1b16c50787, type: 2}
+  landTile: {fileID: 11400000, guid: c8ff0266b1fe1bd46b44641b3461c1f6, type: 2}
   maxX: 1000
   maxY: 1000
   roadRatio: 0.02
