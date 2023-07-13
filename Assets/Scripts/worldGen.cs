@@ -1,12 +1,19 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+
 using UnityEngine;
 using UnityEngine.Tilemaps;
+using UnityEngine.SceneManagement;
+using Random=UnityEngine.Random;
 
 public class worldGen : MonoBehaviour
 {
+	// Singleton pattern;
+	public static worldGen instance;
+	
 	// Public basic setup
 	public GameObject GridObj;
 	// Some things have to be scaled to the size of the map, this is done in worldgen
@@ -40,7 +47,12 @@ public class worldGen : MonoBehaviour
 	int maxHeight = 0;
 	Tilemap landLayer;
 	Tilemap primaryLayer;
-	
+	bool inProgress = false;
+	float currentProgress = 0.0f; // The unweighted value of all previous stage steps
+	float stageWeight = 0.0f; // The weight of the current stage, used for calculating progress
+	float stageProgress = 0.0f; // The progress of a current substage of world generation
+	float totalWeight = 0.0f; // The total cost of worldgen
+	string stageName = "Waiting to begin";
 	// Populated during road generation 
 	// denotes if a spot is a full tile that can support a road
 	bool[,] emptyField;
@@ -51,15 +63,64 @@ public class worldGen : MonoBehaviour
 	
 	public Sprite debugSprite;
 	
+	public (string,float) getProgress(){
+		if(!inProgress) {return ("Waiting to begin",0.0f);}
+		return (stageName,(currentProgress + stageWeight * stageProgress) / totalWeight);
+	}
+	
 	void Start(){
-		Debug.Log("Loading Complete");
-		StartCoroutine(Generate());
+		instance = this;
 	}
 	
     // Called to begin world generation
-    IEnumerator Generate()
+    public IEnumerator Generate()
     {	
 		Debug.Log("Generation Called");
+		inProgress = true;
+		
+		// Go through all worldgesn steps, each asynchronous
+		List<(string,IEnumerator,float)> worldGenSteps = new List<(string,IEnumerator,float)>();
+		worldGenSteps.Add(("Preparing for World Generation",preGenerationSteps(),0.1f)); // The basic steps that have to happen first
+		worldGenSteps.Add(("Making an island",createIsland(),5.0f)); // Place the island
+		worldGenSteps.Add(("Adding large roads",createRoads(),1.0f)); // Place major(4 lane) roads
+		worldGenSteps.Add(("Creating city blocks",assignPlots(),1.0f)); // Make building plots near roads
+		worldGenSteps.Add(("Filling city blocks",createBuildings(),0.0f)); // Create buildings in the plots
+		worldGenSteps.Add(("Adding other structures",createOtherTiles(),0.0f)); // Place tiles not in plots
+		worldGenSteps.Add(("Finilizing static objects",bakeStatics(),0.0f)); // Finilize static objects
+		worldGenSteps.Add(("Adding dynamic objects",createDyanmics(),0.0f)); // Add dynamic objects
+		worldGenSteps.Add(("Adding too many zombies",createUndead(),0.0f)); // Add zombies
+		worldGenSteps.Add(("Preparing to start the game",startGame(),0.1f)); // Start the game
+		
+		int i = 1;
+		totalWeight = 0.0f;
+		// Count all the worldgen weights
+		foreach ((string,IEnumerator,float) worldGenStage in worldGenSteps){
+			totalWeight += worldGenStage.Item3;
+		}
+		
+		// Iterate through all worldgen steps
+		currentProgress = 0.0f;
+		foreach ((string,IEnumerator,float) worldGenStage in worldGenSteps){
+			// Prepare for the worldgen stage
+			stageName = worldGenStage.Item1;
+			stageWeight = worldGenStage.Item3;
+			Debug.Log(i+"/"+worldGenSteps.Count+") "+stageName);
+			stageProgress = 0.0f; // We reset progress before each stage
+			
+			
+			// Actually start the next worldgen stage
+			yield return null; // Give it the frame, so it can update between steps
+			yield return StartCoroutine(worldGenStage.Item2);
+			
+			// Update information and prepare for next stage
+			i++;
+			currentProgress+=stageWeight;
+		}
+		
+		inProgress = false; // There are no more steps executed after this point
+    }
+	
+	private IEnumerator preGenerationSteps(){
 		layers = new Dictionary<int,Tilemap>();
 		Random.InitState(seed); // Start the randomizer
 		
@@ -84,26 +145,9 @@ public class worldGen : MonoBehaviour
 		
 		Debug.Log("Basic steps complete");
 		yield return null;
-		
-		// Go through all worldgen steps, each asynchronous
-		yield return StartCoroutine(createIsland()); // Place the island
-		yield return null;
-		
-		yield return StartCoroutine(createRoads()); // Place major(4 lane) roads
-		yield return null;
-		
-		yield return StartCoroutine(assignPlots()); // Make building plots near roads and assign buildings to them
-		yield return null;
-		
-		createBuildings(); // Let all buildings place themselves in their plots
-		createOtherTiles(); // Add all tiles not placed on roads
-		bakeStatics(); // Bake in movement and collisions
-		createDyanmics(); // Place dynamic object
-		createUndead(); // Populate with initial undead
-    }
-	
+	}
 	// Tells the world to generate to a specific size
-    IEnumerator createIsland()
+    private IEnumerator createIsland()
     {
 		// How strong should noise be with respect to the distance weights.
 		// Smaller values are less noisy
@@ -121,9 +165,9 @@ public class worldGen : MonoBehaviour
 		
 		// Loop over all tiles
 		for(int x = 0; x < maxX; x++){
-			if(x % 5 == 0){
-				yield return null; // Every 100 lines we rest
-			}
+			stageProgress = (float) x / maxX; // Update progress
+			yield return null;  // We give control back to unity, for a bit
+			
 			for(int y = 0; y < maxY; y++){
 				
 				// Get base perlin noise(Big clumps)
@@ -159,7 +203,7 @@ public class worldGen : MonoBehaviour
 	// Places every possible 3x3 grid of tiles in sequence
 	// So long as there is a sprite for all the tiles placed in the test, 
 	// we have enough sprites for the game
-	void drawTest(){
+	private void drawTest(){
 		int count = 0;
 		
 		// There are 256 possibilites, we represent them in a grid
@@ -259,8 +303,9 @@ public class worldGen : MonoBehaviour
 		// We loop until we hit our number of roads
 		// or we run out of positions
 		while(roadCount < desiredRoads && regularExpansion.Count != 0){
-			// Allow for an asynch break at the middle
-			if(roadCount == desiredRoads / 2){
+			// Allow for an asynch break at quarter incriments
+			if(roadCount == desiredRoads/4 || roadCount == desiredRoads/2 || roadCount == (desiredRoads * 3) / 4){
+				stageProgress = (float) roadCount / desiredRoads;
 				yield return null;
 			}
 			// Check if we do priority, or normal
@@ -389,6 +434,13 @@ public class worldGen : MonoBehaviour
 		// Region creation by flood filling
 		// This works well on wierd, but closed shapes
 		for (int x = 0; x < maxX; x++){
+			// We take a break halfway through
+			if(x == maxX/2){
+				stageProgress = 0.25f;
+				yield return null;
+			}
+			
+			// check all y positions
 			for (int y = 0; y < maxY; y++){
 				// We try to "fill on each tile"
 				posVec3 = new Vector3Int(x,y,0); // Tilemaps want 3d vectors
@@ -402,13 +454,19 @@ public class worldGen : MonoBehaviour
 		}
 		
 		// We let the operation take a break
+		stageProgress = 0.5f;
 		yield return null;
 		
 		// Region creation by road following
 		// This works best for open areas without strange obstacles
 		int expandDisMax = 75;
-		
+		int roadsEvaluated = 0;
 		foreach (Vector2Int pos in roadPositions) {
+			roadsEvaluated++;
+			if(roadsEvaluated == roadPositions.Count / 2){
+				stageProgress = 0.75f;
+				yield return null;
+			}
 			posVec3 = new Vector3Int(pos.x,pos.y,0);
 			
 			if (validOpen(ownership,pos.x,pos.y)) {
@@ -601,23 +659,34 @@ public class worldGen : MonoBehaviour
 	}
 	
 	// Place 
-	private void createBuildings(){
-		
+	private IEnumerator createBuildings(){
+		yield return null;
 	}
 	
-	private void createOtherTiles(){
-		
+	private IEnumerator createOtherTiles(){
+		yield return null;
 	}
 	
-	private void bakeStatics(){
-		
+	private IEnumerator bakeStatics(){
+		yield return null;
 	}
 	
-	private void createDyanmics(){
-		
+	private IEnumerator createDyanmics(){
+		yield return null;
 	}
 	
-	private void createUndead(){
-		
+	private IEnumerator createUndead(){
+		yield return null;
+	}
+	
+	private IEnumerator startGame(){
+		// Scene management
+		// Activate out screen
+		SceneManager.SetActiveScene(SceneManager.GetSceneByName("OpenWorld"));
+		// Unload the main screen
+		AsyncOperation loading = SceneManager.UnloadSceneAsync("MainScreen");
+		while(!loading.isDone){
+			yield return null;
+		}
 	}
 }
