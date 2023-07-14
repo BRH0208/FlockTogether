@@ -661,11 +661,11 @@ MonoBehaviour:
   camera: {fileID: 1750464618}
   roadTile: {fileID: 11400000, guid: edbef961c0be5b84599f4b1b16c50787, type: 2}
   landTile: {fileID: 11400000, guid: c8ff0266b1fe1bd46b44641b3461c1f6, type: 2}
-  maxX: 1000
-  maxY: 1000
+  maxX: 500
+  maxY: 500
   roadRatio: 0.02
   roadVariance: 0.2
-  seed: 23
+  seed: 546
   debugSprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
 --- !u!4 &1440929910
 Transform:
