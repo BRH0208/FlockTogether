@@ -20,6 +20,7 @@ public class worldGen : MonoBehaviour
 	public GameObject noise;
 	public GameObject ocean;
 	public GameObject camera;
+	public GameObject minimap;
 	
 	public TileBase roadTile;
 	public TileBase landTile;
@@ -102,6 +103,7 @@ public class worldGen : MonoBehaviour
 		currentProgress = 0.0f;
 		foreach ((string,IEnumerator,float) worldGenStage in worldGenSteps){
 			// Prepare for the worldgen stage
+			double stepStartTime = Time.realtimeSinceStartupAsDouble; // Start the stopwatch
 			stageName = worldGenStage.Item1;
 			stageWeight = worldGenStage.Item3;
 			Debug.Log(i+"/"+worldGenSteps.Count+") "+stageName);
@@ -115,6 +117,8 @@ public class worldGen : MonoBehaviour
 			// Update information and prepare for next stage
 			i++;
 			currentProgress+=stageWeight;
+			double stepEndTime = Time.realtimeSinceStartupAsDouble; // Stop the stopwatch
+			Debug.Log("Time elapsed:" + (stepEndTime - stepStartTime)); // Log stopwatch time
 		}
 		
 		inProgress = false; // There are no more steps executed after this point
@@ -130,7 +134,8 @@ public class worldGen : MonoBehaviour
 		noise.transform.position = new Vector3(maxX/2, maxY/2, 0);
 		noise.GetComponent<SpriteRenderer>().size = new Vector3(maxX, maxY, 0);
 		camera.transform.position = new Vector3(maxX/2, maxY/2, -1);
-		
+		minimap.transform.position = new Vector3(maxX/2, maxY/2, -1);
+		minimap.GetComponent<Camera>().orthographicSize = Mathf.Max(maxX,maxY)/2.0f;
 		// Manage layer 0
         GameObject LandLayer = GridObj.transform.Find("LandLayer").gameObject; // Find it
 		layers.Add(0,LandLayer.GetComponent<Tilemap>()); // Store the tilemap(as reference)
@@ -163,12 +168,16 @@ public class worldGen : MonoBehaviour
 		float perlinOffsetX = Random.Range(-65536,65536);
 		float perlinOffsetY = Random.Range(-65536,65536);
 		
+		TileBase[] islandTileArray = new TileBase[maxX * maxY];
+		int tileArrayIndex = 0;
+		
 		// Loop over all tiles
-		for(int x = 0; x < maxX; x++){
-			stageProgress = (float) x / maxX; // Update progress
-			yield return null;  // We give control back to unity, for a bit
-			
-			for(int y = 0; y < maxY; y++){
+		for(int y = 0; y < maxY; y++){
+			if(y % 100 == 0){
+				stageProgress = (((float) y) / maxY)/2; // Update progress
+				yield return null;  // We give control back to unity, for a bit
+			}
+			for(int x = 0; x < maxX; x++){
 				
 				// Get base perlin noise(Big clumps)
 				float noise = Mathf.PerlinNoise(
@@ -187,13 +196,22 @@ public class worldGen : MonoBehaviour
 				if(distance + noiseRatio * noise < 0){
 					// Place a land tile
 					Vector3Int pos = new Vector3Int(x,y,0);
-					landLayer.SetTile(pos,landTile);
+					islandTileArray[tileArrayIndex] = landTile;
 					
 					// Add this tile to the count
 					count++;
 				}
+				
+				// What position we are in in the 1d array
+				tileArrayIndex++;
 			}
 		}
+		
+		stageProgress = (float) 0.5f; // Update progress
+		yield return null;  // We give control back to unity, for a bit
+		
+		// Actually place the tiles using the mass place command
+        landLayer.SetTilesBlock(new BoundsInt(0,0,0,maxX,maxY,1), islandTileArray);
 		
 		Debug.Log(count + " tiles placed, " + (count)/6806.25f + " square miles" );
 		
@@ -433,6 +451,7 @@ public class worldGen : MonoBehaviour
 		
 		// Region creation by flood filling
 		// This works well on wierd, but closed shapes
+		
 		for (int x = 0; x < maxX; x++){
 			// We take a break halfway through
 			if(x == maxX/2){
@@ -464,95 +483,118 @@ public class worldGen : MonoBehaviour
 		foreach (Vector2Int pos in roadPositions) {
 			roadsEvaluated++;
 			if(roadsEvaluated == roadPositions.Count / 2){
-				stageProgress = 0.75f;
+				stageProgress = 0.75f; // We are halfway complete with the second part of region filling, so 75%
 				yield return null;
 			}
 			posVec3 = new Vector3Int(pos.x,pos.y,0);
 			
-			if (validOpen(ownership,pos.x,pos.y)) {
-				// We try to find out if we are a straight road.
-				// If we are in a corner between roads we do nothing
-				bool foundDirection = true; // We default to true, but it is set to false in the else blcok
-				Vector3Int anchorDir = Vector3Int.zero; // The direction of the road we are "hooked" to
-				Vector3Int leftDir = Vector3Int.zero; // A direction perpendicular to the road direction, either is valid
+			if (!validOpen(ownership,pos.x,pos.y)) {
+				continue;
+			}
+			// We try to find out if we are a straight road.
+			// If we are in a corner between roads we do nothing
+			bool foundDirection = true; // We default to true, but it is set to false in the else blcok
+			Vector3Int anchorDir = Vector3Int.zero; // The direction of the road we are "hooked" to
+			Vector3Int leftDir = Vector3Int.zero; // A direction perpendicular to the road direction, either is valid
+			
+			// If we are down anchored
+			if (primaryLayer.GetTile(posVec3 + Vector3Int.down) == roadTile 
+				&& primaryLayer.GetTile(posVec3 + Vector3Int.left) != roadTile
+				&& primaryLayer.GetTile(posVec3 + Vector3Int.right) != roadTile)
+			{
+				anchorDir = Vector3Int.down;
+				leftDir = Vector3Int.left;
 				
-				// If we are down anchored
-				if (primaryLayer.GetTile(posVec3 + Vector3Int.down) == roadTile 
-					&& primaryLayer.GetTile(posVec3 + Vector3Int.left) != roadTile
-					&& primaryLayer.GetTile(posVec3 + Vector3Int.right) != roadTile)
-				{
-					anchorDir = Vector3Int.down;
-					leftDir = Vector3Int.left;
-					
-					// Sometimes we are in a tunnel, this case is handled seperatly
-					if(primaryLayer.GetTile(posVec3 + Vector3Int.up) == roadTile && Random.Range(0.0f,1.0f) < 0.5f){
-						anchorDir = Vector3Int.up;
-					}
-				} 
-				// If we are left anchored
-				else if (primaryLayer.GetTile(posVec3 + Vector3Int.left) == roadTile 
-					&& primaryLayer.GetTile(posVec3 + Vector3Int.up) != roadTile
-					&& primaryLayer.GetTile(posVec3 + Vector3Int.down) != roadTile)
-				{
-					anchorDir = Vector3Int.left;
-					leftDir = Vector3Int.up;
-					
-					// Case for vertical tunnels
-					if(primaryLayer.GetTile(posVec3 + Vector3Int.right) == roadTile && Random.Range(0.0f,1.0f) < 0.5f){
-						anchorDir = Vector3Int.right;
-					}
-				}
-				// If we are right anchored
-				else if (primaryLayer.GetTile(posVec3 + Vector3Int.right) == roadTile 
-					&& primaryLayer.GetTile(posVec3 + Vector3Int.up) != roadTile
-					&& primaryLayer.GetTile(posVec3 + Vector3Int.down) != roadTile)
-				{
-					anchorDir = Vector3Int.right;
-					leftDir = Vector3Int.up;
-				}
-				// If we are up anchored
-				else if (primaryLayer.GetTile(posVec3 + Vector3Int.up) == roadTile 
-					&& primaryLayer.GetTile(posVec3 + Vector3Int.left) != roadTile
-					&& primaryLayer.GetTile(posVec3 + Vector3Int.right) != roadTile)
-				{
+				// Sometimes we are in a tunnel, this case is handled seperatly
+				if(primaryLayer.GetTile(posVec3 + Vector3Int.up) == roadTile && Random.Range(0.0f,1.0f) < 0.5f){
 					anchorDir = Vector3Int.up;
-					leftDir = Vector3Int.right;
-				} else {
-					foundDirection = false;
 				}
+			} 
+			// If we are left anchored
+			else if (primaryLayer.GetTile(posVec3 + Vector3Int.left) == roadTile 
+				&& primaryLayer.GetTile(posVec3 + Vector3Int.up) != roadTile
+				&& primaryLayer.GetTile(posVec3 + Vector3Int.down) != roadTile)
+			{
+				anchorDir = Vector3Int.left;
+				leftDir = Vector3Int.up;
 				
-				// If we did find our direction
-				if (foundDirection) {
-					// expand left(and center)
-					for (int roadOffset = 0; 
-						primaryLayer.GetTile(posVec3  + leftDir * roadOffset + anchorDir) == roadTile // Must have a road in anchoring direction
-						&& validOpen(ownership, pos.x - roadOffset * leftDir.x,pos.y - roadOffset * leftDir.y); // Must have atleast 1 open tile in front
-						roadOffset++){
-						// For all positions along the road, we want to expend upto 50 units up(where allowed)
-						for(int expandOffset = 0;
-							expandOffset < expandDisMax
-							&& validOpen(ownership, pos.x - roadOffset * leftDir.x - expandOffset * anchorDir.x,pos.y - roadOffset * leftDir.y - expandOffset * anchorDir.y);
-							expandOffset++
-						){
-							ownership[pos.x - roadOffset * leftDir.x - expandOffset * anchorDir.x,pos.y - roadOffset * leftDir.y - expandOffset * anchorDir.y] = currentIndex;
-						}
-					}
-					// expand right
-					for (int roadOffset = -1; 
-						primaryLayer.GetTile(posVec3  + leftDir * roadOffset + anchorDir) == roadTile // Must have a road in anchoring direction
-						&& validOpen(ownership, pos.x - roadOffset * leftDir.x,pos.y - roadOffset * leftDir.y); // Must have atleast 1 open tile in front
-						roadOffset--){
-						for(int expandOffset = 0;
-							expandOffset < expandDisMax
-							&& validOpen(ownership, pos.x - roadOffset * leftDir.x - expandOffset * anchorDir.x,pos.y - roadOffset * leftDir.y - expandOffset * anchorDir.y);
-							expandOffset++
-						){
-							ownership[pos.x - roadOffset * leftDir.x - expandOffset * anchorDir.x,pos.y - roadOffset * leftDir.y - expandOffset * anchorDir.y] = currentIndex;
-						}
-					}
-					currentIndex++;
+				// Case for vertical tunnels
+				if(primaryLayer.GetTile(posVec3 + Vector3Int.right) == roadTile && Random.Range(0.0f,1.0f) < 0.5f){
+					anchorDir = Vector3Int.right;
 				}
 			}
+			// If we are right anchored
+			else if (primaryLayer.GetTile(posVec3 + Vector3Int.right) == roadTile 
+				&& primaryLayer.GetTile(posVec3 + Vector3Int.up) != roadTile
+				&& primaryLayer.GetTile(posVec3 + Vector3Int.down) != roadTile)
+			{
+				anchorDir = Vector3Int.right;
+				leftDir = Vector3Int.up;
+			}
+			// If we are up anchored
+			else if (primaryLayer.GetTile(posVec3 + Vector3Int.up) == roadTile 
+				&& primaryLayer.GetTile(posVec3 + Vector3Int.left) != roadTile
+				&& primaryLayer.GetTile(posVec3 + Vector3Int.right) != roadTile)
+			{
+				anchorDir = Vector3Int.up;
+				leftDir = Vector3Int.right;
+			} else {
+				foundDirection = false;
+			}
+			
+			// If we did not find our direction, continue. 
+			if (foundDirection == false) {
+				continue;
+			}
+			
+			// Now we expand from our chosen position.
+			// Left/right expands along the "anchoring" road.
+			// In the anchor direction, we expand up to expandDisMax tiles or until an obstical is reached
+			
+			// Pre-loop behavior
+			int roadOffset = 0; // How far offset are we leftwards from the center?
+			int dir = 1;  // 1 or -1. +1 means we next move leftwards, -1 means rightwards.
+			// We loop through roadoffset. This is a while loop for readability
+			while (true) {
+				// We fill from where we are plus to the left times the offset
+				Vector3Int fillPos = posVec3 + leftDir * roadOffset;
+				
+				// Exit check for the while loop
+				if (primaryLayer.GetTile(fillPos + anchorDir) != roadTile // Exit Case #1: If we do not have an anchoring road
+					|| !validOpen(ownership, fillPos.x,fillPos.y)) // Exit Case #2: If we don't have at least 1 open tile in front
+				{
+					// If we are moving left, turn around
+					if(dir == 1){
+						roadOffset = -1; // The center is covered initially, so we move 1 rightward
+						dir = -1; // We change direction
+						continue;
+					}
+					// If we are moving right we are done
+					break;
+				}
+				
+				// For all positions along the road, we want to expend upto 50 units up(where allowed)
+				int expandOffset = 0; // Distance(tiles) opposite the anchoring direction during filling.
+				while (true) {
+					// Exit cases
+					if(expandOffset >= expandDisMax){ // We would go to far
+						break;
+					}
+					
+					// Get a position offset away from the anchor
+					Vector3Int outwardsFillPos = fillPos - expandOffset * anchorDir;
+					// If the position is not valid, we stop for now.
+					if(!validOpen(ownership,outwardsFillPos.x,outwardsFillPos.y)){
+						break;
+					}
+					ownership[outwardsFillPos.x,outwardsFillPos.y] = currentIndex;
+					expandOffset++; // Move further out
+				}
+				
+				// We move leftward or rightward at the end of the loop
+				roadOffset+=dir;
+			}
+			currentIndex++;
 		}
 		
 		
@@ -581,6 +623,7 @@ public class worldGen : MonoBehaviour
 					objToSpawn.transform.position = pos;
 					objToSpawn.GetComponent<SpriteRenderer>().sprite = debugSprite;
 					objToSpawn.GetComponent<SpriteRenderer>().color = colors[ownership[x,y]];
+					objToSpawn.transform.parent = GridObj.transform;
 					tempobjects.Add(objToSpawn);
 				}
 			}
