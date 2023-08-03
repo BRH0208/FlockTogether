@@ -44,10 +44,11 @@ public class worldGen : MonoBehaviour
 	Dictionary<int,Vector2Int> regionOrigins;
 	HashSet<Vector2Int> roadPositions;
 	
+	// Always the 0th element in the layers dictionary. Most things are placed here
+	Tilemap primaryLayer;
+	
 	int minHeight = 0;
 	int maxHeight = 0;
-	Tilemap landLayer;
-	Tilemap primaryLayer;
 	bool inProgress = false;
 	float currentProgress = 0.0f; // The unweighted value of all previous stage steps
 	float stageWeight = 0.0f; // The weight of the current stage, used for calculating progress
@@ -77,7 +78,6 @@ public class worldGen : MonoBehaviour
     public IEnumerator Generate()
     {	
 		Debug.Log("Generation Called");
-		inProgress = true;
 		
 		// Go through all worldgesn steps, each asynchronous
 		List<(string,IEnumerator,float)> worldGenSteps = new List<(string,IEnumerator,float)>();
@@ -98,8 +98,9 @@ public class worldGen : MonoBehaviour
 		foreach ((string,IEnumerator,float) worldGenStage in worldGenSteps){
 			totalWeight += worldGenStage.Item3;
 		}
-		
+	
 		// Iterate through all worldgen steps
+		inProgress = true;
 		currentProgress = 0.0f;
 		foreach ((string,IEnumerator,float) worldGenStage in worldGenSteps){
 			// Prepare for the worldgen stage
@@ -136,17 +137,12 @@ public class worldGen : MonoBehaviour
 		camera.transform.position = new Vector3(maxX/2, maxY/2, -1);
 		minimap.transform.position = new Vector3(maxX/2, maxY/2, -1);
 		minimap.GetComponent<Camera>().orthographicSize = Mathf.Max(maxX,maxY)/2.0f;
-		// Manage layer 0
-        GameObject LandLayer = GridObj.transform.Find("LandLayer").gameObject; // Find it
-		layers.Add(0,LandLayer.GetComponent<Tilemap>()); // Store the tilemap(as reference)
 		
-		// We must create layer #1 for the roads and first floors manually. 
-		// The rest are added by buildings themselves as needed
-		addLayer(); 
+		// Manage layer 0(Primary Layer)
+        // We give this layer a special name because we use it so much
+		primaryLayer = GridObj.transform.Find("LandLayer").gameObject.GetComponent<Tilemap>(); // Find it
+		layers.Add(0,primaryLayer); // Store the tilemap(as reference)
 		
-		// We give some layers special names because we use them so much
-		landLayer = (Tilemap) layers[0];
-		primaryLayer = (Tilemap) layers[1];
 		
 		Debug.Log("Basic steps complete");
 		yield return null;
@@ -160,9 +156,10 @@ public class worldGen : MonoBehaviour
 		// Affects the size of the noise. Larger values result in smaller "bumps"
 		float noiseScale = 8f;
 		
+		
 		// We count the number of tiles so they can be logged
 		int count = 0;
-		landLayer.ClearAllTiles();
+		primaryLayer.ClearAllTiles();
 		
 		// Regular World Generation
 		float perlinOffsetX = Random.Range(-65536,65536);
@@ -211,7 +208,7 @@ public class worldGen : MonoBehaviour
 		yield return null;  // We give control back to unity, for a bit
 		
 		// Actually place the tiles using the mass place command
-        landLayer.SetTilesBlock(new BoundsInt(0,0,0,maxX,maxY,1), islandTileArray);
+        primaryLayer.SetTilesBlock(new BoundsInt(0,0,0,maxX,maxY,1), islandTileArray);
 		
 		Debug.Log(count + " tiles placed, " + (count)/6806.25f + " square miles" );
 		
@@ -230,7 +227,7 @@ public class worldGen : MonoBehaviour
 				// Place "center" position always
 				count++;
 				Vector3Int pos = new Vector3Int(i*4,j*4,0);
-				landLayer.SetTile(pos,landTile);
+				primaryLayer.SetTile(pos,landTile);
 				
 				// For all other positions in a 3x3 grid around the center tile, maybe place tiles
 				int subCount = 1; // The current multiple of the count used to determine placement
@@ -244,7 +241,7 @@ public class worldGen : MonoBehaviour
 						if(count % subCount < subCount / 2){ // This pattern iterates through possibilities
 							// If a tile should be made, place it
 							pos = new Vector3Int(i*4 + x,j*4 + y,0);
-							landLayer.SetTile(pos,landTile);
+							primaryLayer.SetTile(pos,landTile);
 						}
 					}
 				}
@@ -292,12 +289,12 @@ public class worldGen : MonoBehaviour
 	
 	// Place one interconnected road system on the island
 	private IEnumerator createRoads(){
-		// Place the first road
-		Vector3Int center = new Vector3Int(maxX/2,maxY/2,0);
-		primaryLayer.SetTile(center,roadTile);
-		
 		// We assume the sprite the road is placed on is the sprite that roads go on
-		openSprite = landLayer.GetSprite(center);
+		Vector3Int center = new Vector3Int(maxX/2,maxY/2,0);
+		openSprite = primaryLayer.GetSprite(center);
+		
+		// Place the first "seed" road from which all roads will grow
+		primaryLayer.SetTile(center,roadTile);
 		
 		// The set of all tile positions we could place the next road in. Set is for speed an uniqueness
 		HashSet<Vector2Int> regularExpansion = new HashSet<Vector2Int>();
@@ -348,14 +345,8 @@ public class worldGen : MonoBehaviour
 				foundPos = false;
 				posVec3 = new Vector3Int(pos.x,pos.y,0); // Tilemaps want 3d vectors
 				 
-				// We don't place roads that are already roads
-				if(primaryLayer.GetTile(posVec3) == roadTile){
-					possiblePositions.Remove(pos);
-					continue; // try again immedietly
-				}
-				
 				// Ignore positions that are not placeable sprites
-				if(landLayer.GetSprite(posVec3) != openSprite){
+				if(primaryLayer.GetSprite(posVec3) != openSprite){
 					possiblePositions.Remove(pos);
 					continue;
 				}
@@ -697,8 +688,7 @@ public class worldGen : MonoBehaviour
 	private bool validOpen(int[,] ownership,int x, int y, int ownershipValue = -1) {
 		Vector3Int posVec3 = new Vector3Int(x,y,0);
 		return ownership[x,y] == ownershipValue && // Only for specific region flags
-			primaryLayer.GetTile(posVec3) != roadTile && // Not a road
-			landLayer.GetSprite(posVec3) == openSprite; // open grass
+			primaryLayer.GetSprite(posVec3) == openSprite; // open grass
 	}
 	
 	// Place 

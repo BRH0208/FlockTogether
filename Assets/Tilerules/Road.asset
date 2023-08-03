@@ -9,13 +9,47 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9d1514134bc4fbd41bb739b1b9a49231, type: 3}
+  m_Script: {fileID: 11500000, guid: 86bffe24ffbdb664f851d99821daa7a0, type: 3}
   m_Name: Road
   m_EditorClassIdentifier: 
   m_DefaultSprite: {fileID: 1001691846, guid: 06ea48fde77a9b948a524cfd8b2fdaf7, type: 3}
   m_DefaultGameObject: {fileID: 0}
   m_DefaultColliderType: 1
   m_TilingRules:
+  - m_Id: 7
+    m_Sprites:
+    - {fileID: 853247480, guid: 06ea48fde77a9b948a524cfd8b2fdaf7, type: 3}
+    m_GameObject: {fileID: 0}
+    m_MinAnimationSpeed: 1
+    m_MaxAnimationSpeed: 1
+    m_PerlinScale: 0.5
+    m_Output: 0
+    m_ColliderType: 1
+    m_RandomTransform: 0
+    m_Neighbors: 03000000010000000300000001000000
+    m_NeighborPositions:
+    - {x: -1, y: 0, z: 0}
+    - {x: 0, y: -1, z: 0}
+    - {x: 1, y: 0, z: 0}
+    - {x: 0, y: 1, z: 0}
+    m_RuleTransform: 1
+  - m_Id: 5
+    m_Sprites:
+    - {fileID: -1494109814, guid: 06ea48fde77a9b948a524cfd8b2fdaf7, type: 3}
+    m_GameObject: {fileID: 0}
+    m_MinAnimationSpeed: 1
+    m_MaxAnimationSpeed: 1
+    m_PerlinScale: 0.5
+    m_Output: 0
+    m_ColliderType: 1
+    m_RandomTransform: 0
+    m_Neighbors: 01000000010000000300000002000000
+    m_NeighborPositions:
+    - {x: 0, y: 1, z: 0}
+    - {x: 0, y: -1, z: 0}
+    - {x: 1, y: 0, z: 0}
+    - {x: -1, y: 0, z: 0}
+    m_RuleTransform: 1
   - m_Id: 13
     m_Sprites:
     - {fileID: 1001691846, guid: 06ea48fde77a9b948a524cfd8b2fdaf7, type: 3}
@@ -52,7 +86,7 @@ MonoBehaviour:
     m_RuleTransform: 1
   - m_Id: 1
     m_Sprites:
-    - {fileID: -1494109814, guid: 06ea48fde77a9b948a524cfd8b2fdaf7, type: 3}
+    - {fileID: 1945537184, guid: 06ea48fde77a9b948a524cfd8b2fdaf7, type: 3}
     m_GameObject: {fileID: 0}
     m_MinAnimationSpeed: 1
     m_MaxAnimationSpeed: 1
@@ -84,9 +118,9 @@ MonoBehaviour:
     - {x: 1, y: 0, z: 0}
     - {x: 0, y: 1, z: 0}
     m_RuleTransform: 1
-  - m_Id: 2
+  - m_Id: 6
     m_Sprites:
-    - {fileID: 1945537184, guid: 06ea48fde77a9b948a524cfd8b2fdaf7, type: 3}
+    - {fileID: 57807702, guid: 06ea48fde77a9b948a524cfd8b2fdaf7, type: 3}
     m_GameObject: {fileID: 0}
     m_MinAnimationSpeed: 1
     m_MaxAnimationSpeed: 1
@@ -101,3 +135,5 @@ MonoBehaviour:
     - {x: 0, y: -1, z: 0}
     - {x: 1, y: 0, z: 0}
     m_RuleTransform: 0
+  optionTiles:
+  - {fileID: 11400000, guid: ca945796db050ce4397d8a37cc77e8dd, type: 2}

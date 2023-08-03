@@ -17,7 +17,7 @@ public class sceneLogic : MonoBehaviour
 	}
 	void Update(){
 		worldGen worldGenerator = worldGen.instance;
-		if(checkProgress){
+		if(checkProgress && worldGenerator != null){
 			// If we are loading, we get our progress
 			(string,float) progress = worldGenerator.getProgress();
 			// Update the UI with the game's progress

@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: 38a0fb0af7201924795f8e9f76172f88
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - m_PreviewGrid: {instanceID: 0}
+  - LargeRoad: {fileID: 1001691846, guid: 06ea48fde77a9b948a524cfd8b2fdaf7, type: 3}
+  - SmallDriveway: {fileID: -1056810111, guid: b6b9eb242e7161b44827568106b3fa5d, type: 3}
+  - LargeDriveway: {fileID: -730936148, guid: b6b9eb242e7161b44827568106b3fa5d, type: 3}
+  - SmallDrivewayM: {fileID: -1073312241, guid: b6b9eb242e7161b44827568106b3fa5d, type: 3}
+  - LargeDrivewayM: {fileID: -240177163, guid: b6b9eb242e7161b44827568106b3fa5d, type: 3}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
