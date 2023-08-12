@@ -55,6 +55,7 @@ public class Housetile : Tile
             return;
 		AssetDatabase.CreateAsset(ScriptableObject.CreateInstance<Housetile>(), path);
     }
+#endif
 	public override void GetTileData(Vector3Int location, ITilemap tilemap, ref TileData tileData)
     {
 		// Only we get to set our transform
@@ -67,27 +68,43 @@ public class Housetile : Tile
 		tileData.color = Color.white;
 		
 		// Pick a house sprite
-		// As this is visual(until gameplay) This can be actually random
-		tileData.sprite = homeSprites[Random.Range(0,homeSprites.Count())];
+		// This has no change on worldgen. It is still defined by noise as to not change unexpectedly
+		float spritePerlin = RuleTile.GetPerlinValue(location,0.99f,0.5f);
+		spritePerlin = Mathf.Clamp(spritePerlin,0.0f,1.0f);
+		
+		int spriteNumber = (int) (spritePerlin * (homeSprites.Count()-1));
+		tileData.sprite = homeSprites[spriteNumber];
 		
 		// Determine what rotations are valid
 		List<int> validRotationIndexes = new List<int>();
-//		+ "==" + tilemap.GetTile(location + Vector3Int.down));
+		// There must be a road in that direction, and that road must have a conneciton in that direction(for end pieces and curved pieces)
 		if(roadTile == tilemap.GetTile(location + Vector3Int.down)){
-			validRotationIndexes.Add(0);
-			validRotationIndexes.Add(4);
+			if(roadTile == tilemap.GetTile(location + Vector3Int.down + Vector3Int.left)){
+				validRotationIndexes.Add(0);
+			}else if(roadTile == tilemap.GetTile(location + Vector3Int.down + Vector3Int.right)){
+				validRotationIndexes.Add(4);
+			}
 		}
 		if (roadTile == tilemap.GetTile(location + Vector3Int.up)) {
-			validRotationIndexes.Add(2);
-			validRotationIndexes.Add(6);
+			if(roadTile == tilemap.GetTile(location + Vector3Int.up + Vector3Int.right)){
+				validRotationIndexes.Add(2);
+			}else if(roadTile == tilemap.GetTile(location + Vector3Int.up + Vector3Int.left)){
+				validRotationIndexes.Add(6);
+			}
 		}
 		if (roadTile == tilemap.GetTile(location + Vector3Int.right)) {
-			validRotationIndexes.Add(1);
-			validRotationIndexes.Add(5);
+			if(roadTile == tilemap.GetTile(location + Vector3Int.right + Vector3Int.down)){
+				validRotationIndexes.Add(1);
+			}else if(roadTile == tilemap.GetTile(location + Vector3Int.right + Vector3Int.up)){
+				validRotationIndexes.Add(5);
+			}
 		}
 		if (roadTile == tilemap.GetTile(location + Vector3Int.left)) {
-			validRotationIndexes.Add(3);
-			validRotationIndexes.Add(7);
+			if(roadTile == tilemap.GetTile(location + Vector3Int.left + Vector3Int.up)){
+				validRotationIndexes.Add(3);
+			}else if(roadTile == tilemap.GetTile(location + Vector3Int.left + Vector3Int.down)){
+				validRotationIndexes.Add(7);
+			}
 		}
 		
 		if(validRotationIndexes.Count == 0){
@@ -100,11 +117,14 @@ public class Housetile : Tile
         Matrix4x4 newOrientation = tileData.transform;
 		// We chose the index based on the tile's position, this is to make the driveway
 		// position consistant
-		int staticNumber = (int) (RuleTile.GetPerlinValue(location,0.2f,0f) * validRotationIndexes.Count());
-		int chosenIndex = validRotationIndexes[staticNumber ];
+		float directionPerlin = RuleTile.GetPerlinValue(location,0.90f,0f);
+		directionPerlin = Mathf.Clamp(directionPerlin,0.0f,1.0f);
+		
+		int staticNumber = (int) (directionPerlin * (validRotationIndexes.Count()-1));
+		int chosenIndex = validRotationIndexes[staticNumber];
+		
 		newOrientation.SetTRS(Vector3.zero, rotations[chosenIndex], Vector3.one);
         tileData.transform = newOrientation;
 		
 	}
-#endif
 }

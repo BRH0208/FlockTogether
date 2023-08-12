@@ -158,7 +158,7 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: aa34204c0e0c4954086a442b63ec46f8
+      spriteID: 09fdfcd7d46946848a28c06bce03f267
       internalID: -1238210012
       vertices: []
       indices: 
@@ -179,7 +179,7 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: b21052d451d37914aa3dc307580976e7
+      spriteID: dbed34ac48c3bf3448a36e85d7cf9455
       internalID: -1768512643
       vertices: []
       indices: 
@@ -200,7 +200,7 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 590213fe26c30be43a8647c5eee4f626
+      spriteID: d709bea2bbd9096429293e768c11958a
       internalID: -1494109814
       vertices: []
       indices: 
@@ -221,7 +221,7 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 8422274ce83a4de4a80eb4694bd4d34a
+      spriteID: 618071e70fc2f5243abeaf6e2c7336c6
       internalID: 1945537184
       vertices: []
       indices: 
@@ -242,7 +242,7 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 0a1eee3e9bc60fc4789f11a4c88980da
+      spriteID: 7f82f9ff8ca861345910a551ecc3bc4e
       internalID: 57807702
       vertices: []
       indices: 
@@ -263,8 +263,29 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: ff0a265295eaf5e429553ed280e79d7e
+      spriteID: a95df0ac9c65f4040926aefb6f0ed4bd
       internalID: 853247480
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: RoadTileset_7
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 0
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7d93a4e67d3501943ae0e9d2a8a6a9c9
+      internalID: -257973143
       vertices: []
       indices: 
       edges: []
@@ -287,6 +308,7 @@ TextureImporter:
       RoadTileset_4: 1945537184
       RoadTileset_5: 57807702
       RoadTileset_6: 853247480
+      RoadTileset_7: -257973143
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

@@ -20,42 +20,186 @@ public class DrivewayTileset : RuleTile<DrivewayTileset.Neighbor> {
 
 	public override bool RuleMatches(RuleTile.TilingRule rule, Vector3Int position, ITilemap tilemap, ref Matrix4x4 transform){
 		// Get information
-		Vector3 rotation = transform.rotation.eulerAngles;
 		Dictionary<Vector3Int, int> neighbors = rule.GetNeighbors();
 		
-		// Deal with rotations
-		int rotatedDir = (int) (rotation.z / 90f);
-		bool isFlipped = (rotation.y == 180f); 
-		
-		// We look at each position
-		foreach (var square in neighbors){
-			int dir;
-			if (square.Key == Vector3Int.up){
-				dir = 2;
-			} else if (square.Key == Vector3Int.left){
-				dir = 1;
-			} else if (square.Key == Vector3Int.right){
-				dir = 3;
-			} else if (square.Key == Vector3Int.down){
-				dir = 0;
-			} else {
-				dir = -1;
+		bool isFlipped = false;
+		int dir = 0;
+		int subMatches = 0;
+		while (true) {
+			bool matchOutcome = RuleMatchFixed(neighbors, dir, isFlipped, tilemap, position);
+			
+			
+			// Deal with rotations
+			Dictionary<Vector3Int, int> newNeighbors = new Dictionary<Vector3Int, int>();
+			// cases explained here : https://docs.unity3d.com/Packages/com.unity.2d.tilemap.extras@4.0/api/UnityEngine.RuleTile.TilingRuleOutput.Transform.html
+			
+			switch (rule.m_RuleTransform) {
+				case RuleTile.TilingRuleOutput.Transform.Fixed:
+					// If we are not rotating, we end with just the fixed
+					return matchOutcome;
+				case RuleTile.TilingRuleOutput.Transform.Rotated: 
+					// End cases
+					if(matchOutcome == true) {
+						// If we found a rotation which works
+						Quaternion rotation = Quaternion.Euler(0,0,-90f * subMatches);
+						transform = Matrix4x4.Rotate(rotation);
+						return true;
+					} else if(subMatches >= 3) {
+						// If we didn't find a rotation, give up
+						return false;
+					}
+					dir += 1;
+					
+					// Rotate the neighbors
+					foreach (var square in neighbors) {
+						Vector3Int newVec = Vector3Int.RoundToInt(Quaternion.AngleAxis(-90, Vector3.forward) * square.Key);
+						newNeighbors.Add(newVec,square.Value);
+					}
+					break;
+				case RuleTile.TilingRuleOutput.Transform.MirrorX:
+					// End cases
+					if(matchOutcome == true) {
+						// If we found a rotation which works
+						Quaternion rotation = Quaternion.Euler(180 * subMatches,0f,0f);
+						transform = Matrix4x4.Rotate(rotation);
+						return true;
+					} else if(subMatches >= 1) {
+						// If we didn't find a rotation, give up
+						return false;
+					}
+					isFlipped = true;
+					
+					// Rotate the neighbors
+					foreach (var square in neighbors) {
+						Vector3Int newVec = Vector3Int.RoundToInt(Quaternion.AngleAxis(180, Vector3.right) * square.Key);
+						newNeighbors.Add(newVec,square.Value);
+					}
+					break;
+				case RuleTile.TilingRuleOutput.Transform.MirrorY:
+					// End cases
+					if(matchOutcome == true) {
+						// If we found a rotation which works
+						Quaternion rotation = Quaternion.Euler(0,180 * subMatches,0f);
+						transform = Matrix4x4.Rotate(rotation);
+						return true;
+					} else if(subMatches >= 1) {
+						// If we didn't find a rotation, give up
+						return false;
+					}
+					isFlipped = true;
+					
+					// Rotate the neighbors
+					foreach (var square in neighbors) {
+						Vector3Int newVec = Vector3Int.RoundToInt(Quaternion.AngleAxis(180, Vector3.up) * square.Key);
+						newNeighbors.Add(newVec,square.Value);
+					}
+					break;
+				case RuleTile.TilingRuleOutput.Transform.MirrorXY:
+					// End cases
+					if(matchOutcome == true) {
+						// If we found a rotation which works
+						Quaternion rotation;
+						if(subMatches == 2) {
+							rotation = Quaternion.Euler(0,0,0f);
+						} else {
+							rotation = Quaternion.Euler(0,180 * subMatches,0f);
+						}
+						transform = Matrix4x4.Rotate(rotation);
+						return true;
+					} else if(subMatches >= 2) {
+						// If we didn't find a rotation, give up
+						return false;
+					}
+					isFlipped = true;
+					
+					// Flip the neighbors in X
+					if (subMatches == 0) {
+						foreach (var square in neighbors) {
+							Vector3Int newVec = Vector3Int.RoundToInt(Quaternion.AngleAxis(180, Vector3.up) * square.Key);
+							newNeighbors.Add(newVec,square.Value);
+						}
+					}else if (subMatches == 1) {
+						foreach (var square in neighbors) {
+							Vector3Int newVec = Vector3Int.RoundToInt(Quaternion.AngleAxis(180, Vector3.right) * square.Key);
+							newNeighbors.Add(newVec,square.Value);
+						}
+					}
+					break;
+				case RuleTile.TilingRuleOutput.Transform.RotatedMirror:
+					// End cases
+					if(matchOutcome == true) {
+						// If we found a rotation which works
+						Quaternion rotation;
+						if (isFlipped) {
+							rotation = Quaternion.Euler(0,180,90f * subMatches + 180);
+						} else {
+							rotation = Quaternion.Euler(0,0,-90f * subMatches);
+						}
+						transform = Matrix4x4.Rotate(rotation);
+						return true;
+					} else if(subMatches >= 7) {
+						// If we didn't find a rotation, give up
+						return false;
+					}
+					dir = (dir + 1) % 4;
+					if(subMatches == 3){
+						// Flip the neighbors
+						isFlipped = true;
+						foreach (var square in neighbors) {
+							Vector3Int newVec = Vector3Int.RoundToInt(Quaternion.AngleAxis(180, Vector3.up) * square.Key);
+							newNeighbors.Add(newVec,square.Value);
+						}
+						neighbors = newNeighbors;
+						newNeighbors = new Dictionary<Vector3Int, int>(); 
+					}
+					// Rotate the neighbors
+					foreach (var square in neighbors) {
+						Vector3Int newVec = Vector3Int.RoundToInt(Quaternion.AngleAxis(-90, Vector3.forward) * square.Key);
+						newNeighbors.Add(newVec,square.Value);
+					}
+					break;
 			}
-			bool result = RuleMatchDir(square.Value,position + square.Key,tilemap,dir,isFlipped);
-			if (result == false){
-				return false;
-			}
+			// Update modified neighbors
+			neighbors = newNeighbors;
+			subMatches++;
 		}
-		return true; 
 	}
 	
+	public bool RuleMatchFixed(Dictionary<Vector3Int, int> neighbors, int dir, bool isFlipped,ITilemap tilemap, Vector3Int position){
+		// Look over each position
+		foreach (var square in neighbors){
+			// Get the absolute direction from the relative
+			// note: this probally doesn't work. 
+			int localDir = 0;
+
+			if (square.Key == Vector3Int.down){
+				localDir += 0;
+			}else if (square.Key == Vector3Int.right){
+				localDir += 1;
+			}else if (square.Key == Vector3Int.up){
+				localDir += 2;
+			}else if (square.Key == Vector3Int.left){
+				localDir += 3; 
+			}
+			localDir = localDir % 4;
+			
+			// Do rule matching
+			bool result = RuleMatchDir(square.Value,position + square.Key,tilemap,localDir,isFlipped);
+			if (result == false){
+				return false; // A neighbor doesn't match, so the whole rule fails
+			}
+		} 
+		return true; // If all the neighbors pass, the rule succeeds
+	}
     public bool RuleMatchDir(int neighbor, Vector3Int position, ITilemap tilemap, int checkDir, bool isMirror) {
         TileBase tile = tilemap.GetTile(position);
 		switch (neighbor) {
+			case 1:
+				return LargeRoad.Contains(tile) || tile == this;
             case Neighbor.LargeRoad: 			return LargeRoad.Contains(tile);
             case Neighbor.LargeDriveway: 		return compareWithDir(LargeDriveway,tile,position,tilemap, checkDir, isMirror);
 			case Neighbor.SmallDriveway: 		return compareWithDir(SmallDriveway,tile,position,tilemap, checkDir, isMirror);
-			case Neighbor.LargeDrivewayMirror: 		return compareWithDir(SmallDriveway,tile,position,tilemap, checkDir, isMirror, true);
+			case Neighbor.LargeDrivewayMirror: 		return compareWithDir(LargeDriveway,tile,position,tilemap, checkDir, isMirror, true);
 			case Neighbor.SmallDrivewayMirror: 		return compareWithDir(SmallDriveway,tile,position,tilemap, checkDir, isMirror, true);
         }
         return base.RuleMatch(neighbor, tile);
@@ -72,7 +216,7 @@ public class DrivewayTileset : RuleTile<DrivewayTileset.Neighbor> {
 	
 	{
 		// Diagonals we don't check because it would be meaningless
-		if(checkDir == -1){
+		if(checkDir < 0  || checkDir > 3){
 			return false;
 		}
 		// It must be in the tile set
@@ -88,18 +232,35 @@ public class DrivewayTileset : RuleTile<DrivewayTileset.Neighbor> {
 			// If it is rotated, and we requite it to be rotated and we are rotated, it can not work
 			return false;
 		}
-		switch (checkDir){
-			case 0:
-				return rotation.z == 180f;
-			case 1:
-				return rotation.z == 90f;
-			case 2:
-				return rotation.z == 0f;
-			case 3:
-				return rotation.z == 270f;
-			
-		}
 		
-		return true;
+		// Flipping is a form of 180 rotation.
+		float effectiveRotation = rotation.z;
+		
+		// Check rotation
+		if(rotation.y != 180){
+			switch (checkDir) {
+				case 0:
+					return rotation.z == 180;
+				case 1: 
+					return rotation.z == 270;
+				case 2: 
+					return rotation.z == 0;
+				case 3: 
+					return rotation.z == 90;
+			}
+		} else {
+			switch (checkDir) {
+				case 0:
+					return rotation.z == 180;
+				case 1: 
+					return rotation.z == 90;
+				case 2: 
+					return rotation.z == 0;
+				case 3: 
+					return rotation.z == 270;
+			}
+		}
+		// theoretically unreachable
+		return false;
 	}
 }
