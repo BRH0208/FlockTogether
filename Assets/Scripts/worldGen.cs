@@ -214,7 +214,7 @@ public class worldGen : MonoBehaviour
 		worldGenSteps.Add(("Making an island",createIsland(),5.0f)); // Place the island
 		worldGenSteps.Add(("Adding large roads",createRoads(),1.0f)); // Place major(4 lane) roads
 		worldGenSteps.Add(("Creating city blocks",assignPlots(),1.0f)); // Make building plots near roads
-		worldGenSteps.Add(("Filling city blocks",createBuildings(),0.0f)); // Create buildings in the plots
+		worldGenSteps.Add(("Filling city blocks",createBuildings(),10.0f)); // Create buildings in the plots
 		worldGenSteps.Add(("Adding other structures",createOtherTiles(),0.0f)); // Place tiles not in plots
 		worldGenSteps.Add(("Finilizing static objects",bakeStatics(),0.0f)); // Finilize static objects
 		worldGenSteps.Add(("Adding dynamic objects",createDyanmics(),0.0f)); // Add dynamic objects
@@ -586,7 +586,7 @@ public class worldGen : MonoBehaviour
 				// We try to "fill on each tile"
 				posVec3 = new Vector3Int(x,y,0); // Tilemaps want 3d vectors
 				
-				if (!fillPlot(ownership,x,y,currentIndex)){
+				if (!fillPlot(x,y,currentIndex)){
 					// If the fill returned false, then we know a region was made. 
 					
 					// Deal with current region
@@ -617,7 +617,7 @@ public class worldGen : MonoBehaviour
 			}
 			posVec3 = new Vector3Int(pos.x,pos.y,0);
 			
-			if (!validOpen(ownership,pos.x,pos.y)) {
+			if (!validOpen(pos.x,pos.y)) {
 				continue;
 			}
 			// We try to find out if we are a straight road.
@@ -690,7 +690,7 @@ public class worldGen : MonoBehaviour
 				
 				// Exit check for the while loop
 				if (primaryLayer.GetTile(fillPos + anchorDir) != roadTile // Exit Case #1: If we do not have an anchoring road
-					|| !validOpen(ownership, fillPos.x,fillPos.y)) // Exit Case #2: If we don't have at least 1 open tile in front
+					|| !validOpen(fillPos.x,fillPos.y)) // Exit Case #2: If we don't have at least 1 open tile in front
 				{
 					// If we are moving left, turn around
 					if (dir == 1){
@@ -713,7 +713,7 @@ public class worldGen : MonoBehaviour
 					// Get a position offset away from the anchor
 					Vector3Int outwardsFillPos = fillPos - expandOffset * anchorDir;
 					// If the position is not valid, we stop for now.
-					if (!validOpen(ownership,outwardsFillPos.x,outwardsFillPos.y)){
+					if (!validOpen(outwardsFillPos.x,outwardsFillPos.y)){
 						break;
 					}
 					ownership[outwardsFillPos.x,outwardsFillPos.y] = currentIndex;
@@ -769,7 +769,7 @@ public class worldGen : MonoBehaviour
 	List<Vector2Int> trackedELem;
 	// Starting at a position claim all available connected positions
 	// A recursive helper for assignPlots
-	private bool fillPlot(int[,] ownership,int x, int y, int ownervalue, int depth = 0){
+	private bool fillPlot(int x, int y, int ownervalue, int depth = 0){
 		if (depth == 0){
 			trackedELem = new List<Vector2Int>();
 		}
@@ -780,7 +780,7 @@ public class worldGen : MonoBehaviour
 			return true;
 		}
 		// We stop on roads, claimed tiles and non-open land tiles
-		if (!validOpen(ownership,x,y,0)){
+		if (!validOpen(x,y,0)){
 			return depth == 0;
 		}
 		
@@ -791,7 +791,7 @@ public class worldGen : MonoBehaviour
 		
 		
 		// Recurse up
-		if (fillPlot(ownership, x, y+1, ownervalue, depth + 1)){
+		if (fillPlot(x, y+1, ownervalue, depth + 1)){
 			while (trackedELem.Count != 0){
 				ownership[trackedELem[0].x,trackedELem[0].y] = -1;
 				trackedELem.RemoveAt(0);
@@ -800,7 +800,7 @@ public class worldGen : MonoBehaviour
 		}
 		
 		// Recurse left
-		if (fillPlot(ownership, x-1, y, ownervalue, depth + 1)){
+		if (fillPlot(x-1, y, ownervalue, depth + 1)){
 			while (trackedELem.Count != 0){
 				ownership[trackedELem[0].x,trackedELem[0].y] = -1;
 				trackedELem.RemoveAt(0);
@@ -809,7 +809,7 @@ public class worldGen : MonoBehaviour
 		}
 		
 		// Recurse down
-		if (fillPlot(ownership, x, y-1, ownervalue, depth + 1)){
+		if (fillPlot(x, y-1, ownervalue, depth + 1)){
 			while (trackedELem.Count != 0){
 				ownership[trackedELem[0].x,trackedELem[0].y] = -1;
 				trackedELem.RemoveAt(0);
@@ -818,7 +818,7 @@ public class worldGen : MonoBehaviour
 		}
 		
 		// Recurse right
-		if (fillPlot(ownership, x+1, y, ownervalue, depth + 1)){
+		if (fillPlot(x+1, y, ownervalue, depth + 1)){
 			while (trackedELem.Count != 0){
 				ownership[trackedELem[0].x,trackedELem[0].y] = -1;
 				trackedELem.RemoveAt(0);
@@ -829,7 +829,7 @@ public class worldGen : MonoBehaviour
 	}
 	
 	// Is a specific area claimed with a specific region, not a road and not coast/water?
-	private bool validOpen(int[,] ownership,int x, int y, int ownershipValue = -1) {
+	private bool validOpen(int x, int y, int ownershipValue = -1) {
 		Vector3Int posVec3 = new Vector3Int(x,y,0);
 		return ownership[x,y] == ownershipValue && // Only for specific region flags
 			primaryLayer.GetSprite(posVec3) == openSprite; // open grass
@@ -837,6 +837,7 @@ public class worldGen : MonoBehaviour
 	
 	// Place 
 	private IEnumerator createBuildings(){
+		int regionCount = 0;
 		foreach (var regionPair in regionData){
 			WorldgenRegion region = regionPair.Value;
 			// Basic checks
@@ -866,6 +867,8 @@ public class worldGen : MonoBehaviour
 			
 			// because region generation can be slow
 			// We yield control out of the couroutine briefly between regions
+			regionCount++;
+			stageProgress = (float) regionCount / regionData.Count();
 			yield return null;
 		}
 	}
@@ -885,15 +888,16 @@ public class worldGen : MonoBehaviour
 		}
 		
 		// We keep track of the amount of area "covered" to see if we need to grow more.
-		List<Vector2Int> coverage = new List<Vector2Int>();
+		int coverage = 0;
 		
-		// A constant we use in attempting to create the suburbs, this tells us when we can stop
-		float minCoveragePercent = 0.85f;
+		// A constant we use in attempting to create the suburbs
+		// When we are at this percent of our area as roads, we are maybe okay to stop
+		float minCoveragePercent = 0.20f;
 		int minCoverage = (int) (minCoveragePercent * region.size);
 		
 		// The edges left to attempt, starts as a copy of region.getEdges()
 		List<Vector2Int> attemptedEdges = new List<Vector2Int> (region.getEdges());
-		while (coverage.Count() < minCoverage){
+		while (coverage < minCoverage){
 			
 			// Alternate exit condition, if we run out of places to expand from.
 			if(attemptedEdges.Count() == 0){
@@ -908,11 +912,15 @@ public class worldGen : MonoBehaviour
 			Vector2Int entranceDir = getValidSuburbEntrance(entrancePoint,region);
 			if (entranceDir != Vector2Int.zero){
 				// If the entrance is valid
-				// Place the first few suburb tiles, these are garunteed
+				// Place the first suburb tiles, these are garunteed
 				primaryLayer.SetTile((Vector3Int) entrancePoint,suburbTile);
-				primaryLayer.SetTile((Vector3Int) (entrancePoint + entranceDir),suburbTile);
+				
+				coverage += 1;
+				// Now that we know where we are building, we build using a maze generation algoritm
+				// It is similar to Prim's algorithm, but weighted for better suburbs+
+				coverage += suburbBuilder(region, entrancePoint + entranceDir);
+				
 				havePlacedBlocks = true;
-				return havePlacedBlocks;
 			} else {
 				attemptedEdges.RemoveAt(entracePointIndex);
 			}
@@ -920,6 +928,132 @@ public class worldGen : MonoBehaviour
 		}
 		
 		return havePlacedBlocks;
+	}
+	
+	private int suburbBuilder(WorldgenRegion region, Vector2Int startPosition){
+		// We keep track of where we try to add roads, we will actually fill them in later
+		List<Vector2Int> placePositions = new List<Vector2Int>();
+		
+		// A weighted list // TODO: This should be a class
+		Dictionary<Vector2Int, float> expandPositions = new Dictionary<Vector2Int, float>();
+		
+		Vector2Int currentPosition = startPosition;
+		do {
+			// We place a tile at this position
+			// Checks are done when elements are added to the expandPositions list
+			placePositions.Add(currentPosition);
+			
+			// Add nearby positions as possible positions, with low weight;
+			Vector2Int checkDir = Vector2Int.up;
+			for (int directionCount = 0; directionCount < 4; directionCount++) {	
+				// Before each rotation we check, we rotate
+				checkDir = rotateVector2Int(checkDir);
+				// We rotatate first so that continue statements don't skip rotation
+				
+				// We check a single adjacent position(each iteration)
+				Vector2Int adjacentPosition = checkDir + currentPosition;
+				float positionWeight = 0.0f;
+				
+				// What is the position one further forward from where we are checking
+				// If we are looking up, this would be two up. 
+				Vector2Int continuePos = adjacentPosition + checkDir;
+				/*
+				if (primaryLayer.GetTile((Vector3Int) continuePos) == roadTile) {
+					// We don't make entrances, so if this position continues into a road, we don't allow it
+					continue;
+				}
+				if (primaryLayer.GetTile((Vector3Int) continuePos) == suburbTile) {
+					// We are making a tree, so no connecting to previous road tiles!
+					continue;
+				}*/
+				
+				if (!validOpen(adjacentPosition.x,adjacentPosition.y,region.index)) {
+					continue; // We don't allow invalid positions
+				}
+				
+				if (placePositions.Contains(adjacentPosition)){
+					continue; // No placing over yourself;
+				}
+				
+				positionWeight = 0.01f; // We low weight any old valid position;
+				
+				// Make that position valid and give it a weight
+				if(positionWeight > 0.0f) {
+					if(expandPositions.ContainsKey(adjacentPosition)) {
+						expandPositions[adjacentPosition] = Math.Max(expandPositions[adjacentPosition],positionWeight); // we add more weight to that position
+					} else {
+						expandPositions.Add(adjacentPosition, positionWeight); // we create a position with the given weight
+					}
+				}
+			}
+			
+			// We then do a weighted random draw of the expandPositions
+			// We sum all the current weights
+			float weightTotal = 0.0f;
+			foreach (float weight in expandPositions.Values) {
+				weightTotal += weight;
+			}
+			
+			// We generate a random value, then choose the position at that value
+			float randomValue = Random.Range(0.0f,weightTotal);
+			foreach (var pair in expandPositions) {
+				randomValue -= pair.Value; // we count down the weight
+				if(randomValue <= 0.0f) {
+					currentPosition = pair.Key; // If we found our value, move to its position
+					expandPositions.Remove(pair.Key); // It is no longer a possibility
+					break; // We have to stop because enumerations don't like being modified
+				}
+			}
+		} while (expandPositions.Count() > 0);
+		
+		// Place tiles step
+		if(placePositions.Count == 0){
+			return 0; // If we did nothing, do nothing.
+		}
+		
+		// Find the max and min positions. These are used to create our list for the mass place command
+		BoundsInt suburbBoxArea = new BoundsInt();
+		suburbBoxArea.SetMinMax((Vector3Int) placePositions[0],(Vector3Int) placePositions[0] + Vector3Int.one);
+		
+		foreach (Vector2Int position in placePositions) {
+			// We expand the box to fit the position, in the X axis
+			if (position.x >= suburbBoxArea.xMax) {
+				suburbBoxArea.xMax = position.x + 1;
+			}
+			// We cannot do else ifs here, it is not garunteed that xMax > xMin
+			if(position.x < suburbBoxArea.xMin){
+				suburbBoxArea.xMin = position.x;
+			}
+			
+			// We fit the box in the Y axis
+			if (position.y >= suburbBoxArea.yMax) {
+				suburbBoxArea.yMax = position.y + 1;
+			}
+			if(position.y < suburbBoxArea.yMin){
+				suburbBoxArea.yMin = position.y;
+			}
+		}
+		
+		// we store the tiles to be placed in an array that has been squashed to 1d
+		TileBase[] tileArray = new TileBase[suburbBoxArea.size.x * suburbBoxArea.size.y];
+		
+        foreach (Vector2Int position in placePositions) {
+			Vector2Int offsetPos = position - (Vector2Int) suburbBoxArea.min;
+			int arrayIndex = offsetPos.x + suburbBoxArea.size.x * offsetPos.y;
+			if (arrayIndex >= tileArray.Length) {
+				Debug.Log("Mismatched size of tile array");
+				Debug.Log(suburbBoxArea.min.x + " =< " + position.x + " < " + suburbBoxArea.max.x);
+				Debug.Log(suburbBoxArea.min.y + " =< " + position.y + " < " + suburbBoxArea.max.y);
+				Debug.Log(arrayIndex + " / " + tileArray.Length);
+				
+			} else {
+				tileArray[arrayIndex] = suburbTile;
+			}
+		}
+		
+		// Tell unity to place the tiles in bulk.
+		primaryLayer.SetTilesBlock(suburbBoxArea, tileArray);
+		return placePositions.Count();
 	}
 	
 	/*
@@ -988,9 +1122,7 @@ public class worldGen : MonoBehaviour
 						continue;
 					}
 				}
-				if(entrancePoint.x == 206 && entrancePoint.y == 216){
-					Debug.Log(rotateCount + ") "+fitsTemplate+" "+horDir+" x "+vertDir);
-				}
+				
 				// If we found a rotation that fit, we know we are valid
 				if (fitsTemplate){
 					// We don't have to worry about rotation bias
