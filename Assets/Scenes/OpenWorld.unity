@@ -2678,8 +2678,8 @@ MonoBehaviour:
   houseTiles:
   - {fileID: 11400000, guid: 4edebec44fca52b4bb7de26c4d006198, type: 2}
   - {fileID: 11400000, guid: 3fb5f856fc75b3247b7bb1ccc04e1f87, type: 2}
-  maxX: 244
-  maxY: 244
+  maxX: 2500
+  maxY: 2500
   roadRatio: 0.01
   roadVariance: 0.2
   seed: 764
