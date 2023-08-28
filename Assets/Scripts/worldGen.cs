@@ -31,8 +31,13 @@ public class worldGen : MonoBehaviour
 	// Configuration variables
 	public int maxX = 3200; // Measured in tiles(64 feet)
 	public int maxY = 3200;
-	public float roadRatio = 0.06f;
-	public float roadVariance = 0.2f;
+	
+	// Used only during land tile placement.
+	// Larger is lower framerate, but faster
+	private int chunkSize = 250;
+	
+	private float roadRatio = 0.03f;
+	private float roadVariance = 0.01f;
 	public int seed; 
 	
 	/*
@@ -274,43 +279,73 @@ public class worldGen : MonoBehaviour
 		primaryLayer = GridObj.transform.Find("LandLayer").gameObject.GetComponent<Tilemap>(); // Find it
 		layers.Add(0,primaryLayer); // Store the tilemap(as reference)
 		
+		// Clear the primary layer. This happends just in case we run woldgen multiple times
+		primaryLayer.ClearAllTiles();
 		
 		Debug.Log("Basic steps complete");
 		yield return null;
 	}
-	// Tells the world to generate to a specific size
+	
+	// Places the basic land tiles in the world. 
+	// This is done in large "chunks" as to allow for frames between chunk placement
+	// Larger chunks are lower framerate, but take less time overall
     private IEnumerator createIsland()
     {
-		// How strong should noise be with respect to the distance weights.
-		// Smaller values are less noisy
-		float noiseRatio = 1f;
-		// Affects the size of the noise. Larger values result in smaller "bumps"
-		float noiseScale = 8f;
-		
 		
 		// We count the number of tiles so they can be logged
 		int count = 0;
-		primaryLayer.ClearAllTiles();
+		
+		// All chunks of island will use the same perlin offset
+		Vector2 perlinOffset = new Vector2(Random.Range(-65536,65536), Random.Range(-65536,65536));
+		
+		for (int chunkX = 0; chunkX < maxX; chunkX += chunkSize){
+			for (int chunkY = 0; chunkY < maxY; chunkY += chunkSize){
+				float yProgress = (float) (chunkSize*chunkY)/maxY;
+				stageProgress = (((float) chunkX + yProgress)/ maxX);
+				yield return null;
+				Vector2Int chunkCorner = new Vector2Int (chunkX, chunkY);
+				count += createIslandChunk(chunkCorner, perlinOffset);
+			}
+		}
+		Debug.Log(count + " tiles placed, " + (count)/6806.25f + " square miles" );
+		
+    }
+
+	private int createIslandChunk(Vector2Int cornerPoint, Vector2 perlinOffset) {
+		// Computer practical bounds
+		Vector2Int chunkBoundry = Vector2Int.RoundToInt(cornerPoint + (Vector2.one * chunkSize));
+		// Check that our chunk does not go out of the max size
+		if(chunkBoundry.x > maxX){ chunkBoundry.x = maxX; }
+		if(chunkBoundry.y > maxY){ chunkBoundry.y = maxY; }
+		
+		BoundsInt chunkBounds = new BoundsInt(cornerPoint.x,cornerPoint.y,0,chunkSize,chunkSize,1);
+        
+		// How many land tiles have we placed in this chunk?
+		// Tracked as the return variable
+		int chunkCount = 0;
+		
+		// How strong should noise be with respect to the distance weights.
+		// Smaller values are less noisy
+		float noiseRatio = 0.60f;
+		// Affects the size of the noise. Larger values result in smaller "bumps"
+		float noiseScale = 8f;
 		
 		// Regular World Generation
-		float perlinOffsetX = Random.Range(-65536,65536);
-		float perlinOffsetY = Random.Range(-65536,65536);
 		
-		TileBase[] islandTileArray = new TileBase[maxX * maxY];
-		int tileArrayIndex = 0;
+		TileBase[] chunkTileArray = new TileBase[chunkBounds.size.x * chunkBounds.size.y];
+		int chunkArrayIndex = 0;
 		
 		// Loop over all tiles
-		for(int y = 0; y < maxY; y++){
-			if (y % 2 == 0){
-				stageProgress = (((float) y) / maxY)/2; // Update progress
-				yield return null;  // We give control back to unity, for a bit
-			}
-			for(int x = 0; x < maxX; x++){
+		for(int y = cornerPoint.y; y < chunkBoundry.y; y++){
+			for(int x = cornerPoint.x; x < chunkBoundry.x; x++){
+				// We use maxX/maxY instead of chunkBoundry
+				// because these are dependent on the absolute position,
+				// and are independent of what chunk the position is in
 				
 				// Get base perlin noise(Big clumps)
 				float noise = Mathf.PerlinNoise(
-					((float) x) / maxX * noiseScale + perlinOffsetX,
-					((float) y) / maxY * noiseScale + perlinOffsetY);
+					((float) x) / maxX * noiseScale + perlinOffset.x,
+					((float) y) / maxY * noiseScale + perlinOffset.y);
 				// noise = Mathf.Clamp(noise,0f,1f); // This is approximatly true, removed for effeciency
 				
 				// Get weight factor for distance
@@ -323,28 +358,21 @@ public class worldGen : MonoBehaviour
 				// We measure our noise to zero, < 0 is land, > 0 is water
 				if (distance + noiseRatio * noise < 0){
 					// Place a land tile
-					Vector3Int pos = new Vector3Int(x,y,0);
-					islandTileArray[tileArrayIndex] = landTile;
+					chunkTileArray[chunkArrayIndex] = landTile;
 					
 					// Add this tile to the count
-					count++;
+					chunkCount++;
 				}
 				
 				// What position we are in in the 1d array
-				tileArrayIndex++;
+				chunkArrayIndex++;
 			}
 		}
-		
-		stageProgress = (float) 0.5f; // Update progress
-		yield return null;  // We give control back to unity, for a bit
-		
 		// Actually place the tiles using the mass place command
-        primaryLayer.SetTilesBlock(new BoundsInt(0,0,0,maxX,maxY,1), islandTileArray);
-		
-		Debug.Log(count + " tiles placed, " + (count)/6806.25f + " square miles" );
-		
-    }
-
+		primaryLayer.SetTilesBlock(chunkBounds, chunkTileArray);
+		return chunkCount;
+	}
+	
     // A test world for making sure all land tiles can be placed
 	// Places every possible 3x3 grid of tiles in sequence
 	// So long as there is a sprite for all the tiles placed in the test, 
@@ -871,7 +899,10 @@ public class worldGen : MonoBehaviour
 			// We yield control out of the couroutine briefly between regions
 			regionCount++;
 			stageProgress = (float) regionCount / regionData.Count();
-			yield return null;
+			// Every 25 regions we return control
+			if (regionCount % 25 == 0) {
+				yield return null;
+			}
 		}
 		Debug.Log("City populated with " + populationEstimate + " people");
 	}
