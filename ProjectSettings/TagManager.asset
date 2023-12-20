@@ -8,11 +8,11 @@ TagManager:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - PlayerInteract
   - Water
   - UI
-  - 
-  - 
+  - ZombieListener
+  - OpaqueBlocker
   - 
   - 
   - 
@@ -43,4 +43,7 @@ TagManager:
     locked: 0
   - name: Noise
     uniqueID: 1599325269
+    locked: 0
+  - name: Zombies
+    uniqueID: 1580663929
     locked: 0

@@ -8,4 +8,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/OpenWorld.unity
     guid: 2cda990e2423bbf4892e6590ba056729
+  - enabled: 1
+    path: Assets/Scenes/MainScreen.unity
+    guid: a7a60e3375a6da14d8e67b46bf1cb363
   m_configObjects: {}
