@@ -195,7 +195,7 @@ public class DrivewayTileset : RuleTile<DrivewayTileset.Neighbor> {
         TileBase tile = tilemap.GetTile(position);
 		switch (neighbor) {
 			case 1:
-				return LargeRoad.Contains(tile) || tile == this;
+				return tile == this;
             case Neighbor.LargeRoad: 			return LargeRoad.Contains(tile);
             case Neighbor.LargeDriveway: 		return compareWithDir(LargeDriveway,tile,position,tilemap, checkDir, isMirror);
 			case Neighbor.SmallDriveway: 		return compareWithDir(SmallDriveway,tile,position,tilemap, checkDir, isMirror);

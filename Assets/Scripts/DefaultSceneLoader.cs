@@ -5,7 +5,7 @@ using UnityEditor.SceneManagement;
 [InitializeOnLoadAttribute]
 public static class DefaultSceneLoader
 {
-	const bool active = false;
+	const bool active = true;
     static DefaultSceneLoader(){
         if(active){
 			EditorApplication.playModeStateChanged += LoadDefaultScene;

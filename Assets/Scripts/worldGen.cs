@@ -21,7 +21,7 @@ public class worldGen : MonoBehaviour
 	public GameObject cameraObj;
 	public GameObject minimap;
 	public GameObject eventSystem;
-	
+	public GameObject oceanObj;
 	public GameObject zombieObj; 
 	 
 	public TileBase roadTile;
@@ -29,6 +29,8 @@ public class worldGen : MonoBehaviour
 	public TileBase suburbTile;
 	public TileBase parkingTile;
 	public List<TileBase> houseTiles;
+	
+	public TileBase[] overlayTiles;
 	
 	// Configuration variables
 	public int maxX = 3200; // Measured in tiles(64 feet)
@@ -190,6 +192,7 @@ public class worldGen : MonoBehaviour
 	
 	// Always the 0th element in the layers dictionary. Most things are placed here
 	private Tilemap primaryLayer;
+	private Tilemap overdrawLayer;
 	
 	private int minHeight = 0;
 	private int maxHeight = 0;
@@ -225,20 +228,14 @@ public class worldGen : MonoBehaviour
 		
 		// Go through all worldgesn steps, each asynchronous
 		List<(string,IEnumerator,float)> worldGenSteps = new List<(string,IEnumerator,float)>();
-		if(seed == 0){
 		worldGenSteps.Add(("Preparing for World Generation",preGenerationSteps(),0.1f)); // The basic steps that have to happen first
 		worldGenSteps.Add(("Making an island",createIsland(),5.0f)); // Place the island
-		if(seed == 0){
-			//worldGenSteps.Add(("DEBUG WORLD",drawTest(parkingTile),0.1f));
-		}else{
-			worldGenSteps.Add(("Adding large roads",createRoads(),1.0f)); // Place major(4 lane) roads
-			worldGenSteps.Add(("Creating city blocks",assignPlots(),1.0f)); // Make building plots near roads
-			worldGenSteps.Add(("Filling city blocks",createBuildings(),10.0f)); // Create buildings in the plots
-			worldGenSteps.Add(("Adding other structures",createOtherTiles(),0.0f)); // Place tiles not in plots
-			worldGenSteps.Add(("Finilizing static objects",bakeStatics(),0.0f)); // Finilize static objects
-			worldGenSteps.Add(("Adding dynamic objects",createDyanmics(),0.0f)); // Add dynamic objects
-		}
-		}
+		worldGenSteps.Add(("Adding large roads",createRoads(),1.0f)); // Place major(4 lane) roads
+		worldGenSteps.Add(("Creating city blocks",assignPlots(),1.0f)); // Make building plots near roads
+		worldGenSteps.Add(("Filling city blocks",createBuildings(),10.0f)); // Create buildings in the plots
+		worldGenSteps.Add(("Adding other structures",createOtherTiles(),0.0f)); // Place tiles not in plots
+		worldGenSteps.Add(("Finilizing static objects",bakeStatics(),0.0f)); // Finilize static objects
+		worldGenSteps.Add(("Adding dynamic objects",createDyanmics(),0.0f)); // Add dynamic objects
 		worldGenSteps.Add(("Adding too many zombies",createUndead(),0.0f)); // Add zombies
 		worldGenSteps.Add(("Preparing to start the game",startGame(),0.1f)); // Start the game
 		
@@ -284,19 +281,26 @@ public class worldGen : MonoBehaviour
 		noise.transform.localScale = new Vector3(0.5f, 0.5f, 0);
 		noise.GetComponent<SpriteRenderer>().size = new Vector3(maxX*2, maxY*2, 0);
 		cameraObj.transform.position = new Vector3(maxX/2, maxY/2, -1);
+		oceanObj.transform.position = new Vector3(maxX/2, maxY/2, 2);
+		oceanObj.transform.localScale = new Vector3(maxX*2, maxY*2, 0);
 		minimap.transform.position = new Vector3(maxX/2, maxY/2, -1);
 		minimap.GetComponent<Camera>().orthographicSize = Mathf.Max(maxX,maxY)/2.0f;
 		
 		// Manage layer 0(Primary Layer)
         // We give this layer a special name because we use it so much
 		primaryLayer = GridObj.transform.Find("LandLayer").gameObject.GetComponent<Tilemap>(); // Find it
+		overdrawLayer = GridObj.transform.Find("OverdrawLayer").gameObject.GetComponent<Tilemap>();
+		
 		layers.Add(0,primaryLayer); // Store the tilemap(as reference)
 		
 		// Clear the primary layer. This happends just in case we run woldgen multiple times
+		// Or had "leftover" tiles in the scene
 		primaryLayer.ClearAllTiles();
+		overdrawLayer.ClearAllTiles();
 		
 		// Reset zombie counter
 		zombieCount = 0;
+		
 		Debug.Log("Basic steps complete");
 		yield return null;
 	}
@@ -949,18 +953,25 @@ public class worldGen : MonoBehaviour
 		// Once we place tiles, we are commited to this being a suburb
 		bool havePlacedBlocks = false;
 		
+		// Reasons to not build a suburb
 		if (region.size < 16) {
 			return havePlacedBlocks;
 		}
-		
+		if (region.size > 700){
+			return havePlacedBlocks;
+		}
 		if (region.getEdges().Count() < 12) {
 			return havePlacedBlocks;
 		}
+		bool isGrid = (Random.Range(0.0f,1.0f) < 0.5f);
 		
 		// We keep track of the amount of area "covered" to see if we need to grow more.
 		int coverage = 0;
 		int entrances = 0;
 		int minEntrances = 1 + (int)(region.size / 250);
+		if(isGrid){
+			minEntrances = 1; // Grid suburbs make entrances, so as long as we meet coverage we have enough suburb
+		}
 		// A constant we use in attempting to create the suburbs
 		// When we are at this percent of our area as roads, we are maybe okay to stop
 		float minCoveragePercent = 0.20f;
@@ -984,13 +995,15 @@ public class worldGen : MonoBehaviour
 			Vector2Int entranceDir = getValidSuburbEntrance(entrancePoint,region);
 			if (entranceDir != Vector2Int.zero){
 				// If the entrance is valid
-				// Place the first suburb tiles, these are garunteed
-				primaryLayer.SetTile((Vector3Int) entrancePoint,suburbTile);
-				
 				coverage += 1;
-				// Now that we know where we are building, we build using a maze generation algoritm
-				// It is similar to Prim's algorithm, but weighted for better suburbs
-				coverage += suburbBuilder(region, entrancePoint + entranceDir, ref placedTilePosition);
+				if(isGrid) {
+					// Grid suburbs look uniform and work best in dense areas.
+					coverage += gridSuburbBuilder(region, entrancePoint, entranceDir, ref placedTilePosition);
+				} else {
+					// "Naturalistic" suburbs are high variety, but on sizes above about 600 they don't work as well
+					// We build using a maze generation algoritm similar to Prim's algorithm, but weighted for better suburbs
+					coverage += suburbBuilder(region, entrancePoint, entranceDir, ref placedTilePosition);
+				}
 				entrances += 1;
 				havePlacedBlocks = true;
 			} else {
@@ -1151,8 +1164,92 @@ public class worldGen : MonoBehaviour
 			}
 		}
 	}
-
-	private int suburbBuilder(WorldgenRegion region, Vector2Int startPosition, ref List<Vector2Int> positionList){
+	
+	// TODO: This method is ineffecient. It does constant Contains checks on lists.
+	private int gridSuburbBuilder(WorldgenRegion region, Vector2Int startPosition, Vector2Int startDir, ref List<Vector2Int> positionList){
+		
+		List<Vector2Int> placePositions = new List<Vector2Int>();
+		
+		// These are the possible locations we could try to grow from. 
+		List<Vector2Int> expandLocations = new List<Vector2Int>();
+		List<Vector2Int> failedPositions = new List<Vector2Int>();
+		expandLocations.Add(startPosition);
+		Vector2Int currentPos;
+		Vector2Int leftDir = rotateVector2Int(startDir);
+		while (expandLocations.Count != 0) {
+			
+			int posIndex = Random.Range(0,expandLocations.Count);
+			currentPos = expandLocations[posIndex];
+			expandLocations.RemoveAt(posIndex);
+			
+			// Expand in the direction
+			Vector2Int travelPosTop;
+			Vector2Int travelPosBottom; // "Bottom" is not cardinal south. In this context, "Bottom" is inverse of the initial direction
+			
+			for (travelPosTop = currentPos + startDir; // Start the travel pointer
+				 validOpen(travelPosTop,region.index) && validOpen(travelPosTop+leftDir,region.index) && validOpen(travelPosTop-leftDir,region.index);
+				 travelPosTop += startDir) { // Move the travel pointer
+				// Mark the tile to be placed
+				if(!placePositions.Contains(travelPosTop)) {
+					placePositions.Add(travelPosTop);
+				}
+			}
+			travelPosTop = travelPosTop - startDir; // We overshoot by 1.
+			// TODO: Moving backwards by 1 is inelegant
+			// Expand in the other direction
+			for (travelPosBottom = currentPos; // Start the travel pointer
+				 validOpen(travelPosBottom,region.index) && validOpen(travelPosBottom+leftDir,region.index) && validOpen(travelPosBottom-leftDir,region.index);
+				 travelPosBottom -= startDir) { // Move the travel pointer
+				// Mark the tile to be placed
+				if(!placePositions.Contains(travelPosBottom)) {
+					placePositions.Add(travelPosBottom);
+				}
+			}
+			travelPosBottom = travelPosBottom + startDir; // We overshoot by 1.
+			
+			// Edge Case: We were blocked from expanding enough to form a suburb(Need atleast 2 roads)
+			if(travelPosBottom == travelPosTop){
+				placePositions.Remove(travelPosTop); // We could't place here, but we might be able to expand still.
+				failedPositions.Add(travelPosTop);
+			}
+			
+			
+			// Add new positions to the expandLocations
+			// TODO: This approach limits the ability for 1 spaced suburbs to be placed.
+			List<Vector2Int> potentialNewLoc = new List<Vector2Int>();
+			potentialNewLoc.Add(travelPosBottom + leftDir * 3);
+			potentialNewLoc.Add(travelPosBottom - leftDir * 3);
+			potentialNewLoc.Add(travelPosTop + leftDir * 3);
+			potentialNewLoc.Add(travelPosTop - leftDir * 3);
+			
+			foreach (Vector2Int loc in potentialNewLoc) {
+				if ((primaryLayer.GetTile((Vector3Int) (loc + startDir)) == roadTile || primaryLayer.GetTile((Vector3Int) (loc - startDir)) == roadTile) && // We must neighbor a road
+					!expandLocations.Contains(loc) && // Prevent double growth
+					!placePositions.Contains(loc) && // Prevent expanding where we have already gone(but other entrances would be acceptable
+					!failedPositions.Contains(loc) &&
+					validOpen(loc,region.index) && // The center must be available
+					validOpen(loc+leftDir,region.index) && // The "left" must be available
+					validOpen(loc-leftDir,region.index)) { // The "right" must be available
+						expandLocations.Add(loc);
+				}
+			}
+			
+		}
+		foreach (Vector2Int position in placePositions){
+			if (!positionList.Contains(position))
+				positionList.Add(position);
+		}
+		// Actually place the tiles
+		return customMassTilePlace(placePositions,suburbTile);
+	}
+	
+	private int suburbBuilder(WorldgenRegion region, Vector2Int startPosition, Vector2Int startDir, ref List<Vector2Int> positionList){
+		// Place the first suburb tiles, this is garunteed
+		primaryLayer.SetTile((Vector3Int) startPosition,suburbTile);
+		
+		// We store startdir for parity with gridSuburbBuilder, but we only use it here.
+		startPosition = startPosition + startDir;
+		
 		// We keep track of where we try to add roads, we will actually fill them in later
 		List<suburbPosition> evaluatedPositions = new List<suburbPosition>();
 		List<Vector2Int> placePositions = new List<Vector2Int>();
@@ -1371,6 +1468,60 @@ public class worldGen : MonoBehaviour
 	}
 	
 	private IEnumerator bakeStatics(){
+		// First: We must add overlay roads(sidewalks) to the overlay tilemap
+		BoundsInt worldBounds = new BoundsInt(new Vector3Int(0, 0, 0), new Vector3Int(maxX, maxY, 1));
+		foreach (Vector3Int point in worldBounds.allPositionsWithin)
+        {
+			TileBase tile = primaryLayer.GetTile(point);
+			if(tile == roadTile){
+				String name = primaryLayer.GetSprite(point).name; 
+				Matrix4x4 rot = primaryLayer.GetTransformMatrix(point);
+				TileChangeData newData = new TileChangeData( point, null, Color.white, rot);
+				bool needChange = true;
+				switch(name) {
+					// TODO: Long switch statements are a sign of bad code
+					// Consider alternate design
+					case "RoadTileset_(A)1":
+						newData.tile = overlayTiles[2];
+					break;
+					
+					case "RoadTileset_(A)2":
+						// In this case we need to rotate
+						newData.transform = Matrix4x4.Rotate(Quaternion.Euler(0.0f, 0.0f, rot.rotation.eulerAngles.z+180f));
+						newData.tile = overlayTiles[2];
+					break;
+					
+					case "RoadTileset_(A)3":
+						newData.tile = overlayTiles[2];
+					break;
+					
+					case "RoadTileset_(N)End":
+						newData.tile = overlayTiles[3];
+					break;
+					
+					case "RoadTileset_(N)Intersection":
+						newData.tile = overlayTiles[2];
+					break;
+					
+					case "RoadTileset_(N)Corner":
+						newData.tile = overlayTiles[1];
+					break;
+					
+					case "RoadTileset_(N)Straight":
+						newData.tile = overlayTiles[0];
+					break;
+					
+					default: // If we need not add sidewalk, or the name is unknown to us
+						needChange = false;
+					break;
+				}
+				if(needChange) {
+					overdrawLayer.SetTile(newData,false);
+				}
+
+				// TODO: Optimise placement with a mass tile placement
+			}
+        }
 		yield return null;
 	}
 	
@@ -1384,11 +1535,11 @@ public class worldGen : MonoBehaviour
 		Instantiate(zombieObj, new Vector3(x, y, 0), rotation,transform);
 	}
 	private IEnumerator createUndead(){
-		for(float x = 48.98f; x < 49.7f; x+=0.04f){
+		/*for(float x = 48.98f; x < 49.7f; x+=0.04f){
 			for(float y = 49f; y < 49.6f; y+=0.04f){
 				spawnZombie(x,y);
 			}
-		}
+		}*/
 		Debug.Log("The zombie hoard has been made with "+(zombieCount) + "zombies");
 		yield return null;
 	}

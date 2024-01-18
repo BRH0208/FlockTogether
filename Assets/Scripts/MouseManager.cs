@@ -34,7 +34,7 @@ public class MouseManager : MonoBehaviour
 			selectedObj = minPlayer;
 		}
 		// This ordering is intentional to allow double mouse buttons to grab and command. 
-		if (true)//Input.GetMouseButtonDown(0))
+		if (Input.GetMouseButtonDown(0))
         {
 			if(selectedObj != null){
 				HumanAI ai = selectedObj.GetComponent<HumanAI>();

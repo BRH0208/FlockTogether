@@ -13,6 +13,7 @@ public class OceanRenderer : MonoBehaviour
     // over the width and height of the texture.
     public float scale;
 	public float intensity;
+	public float timeDelta = 0.1f;
 	public int pixelScale; // How many pixels per pixel of noise?
     private Texture2D noiseTex;
     private Color[] pix;
@@ -46,6 +47,7 @@ public class OceanRenderer : MonoBehaviour
 	}
     void CalcNoise()
     {
+		float time = Time.time;
         // For each pixel in the texture...
         float y = 0.0F;
 
@@ -58,7 +60,9 @@ public class OceanRenderer : MonoBehaviour
                 float xCoord = noisePos.x * scale;
                 float yCoord = noisePos.y * scale;
                 float sample = Mathf.PerlinNoise(xCoord, yCoord);
-                pix[(int)y * noiseTex.width + (int)x] = new Color(1-sample*intensity, 1-sample*intensity, 1-sample*intensity);
+				//sample = Mathf.PerlinNoise(-time/timeDelta, sample); // Lazy 3d noise;
+                
+				pix[(int)y * noiseTex.width + (int)x] = new Color(1-sample*intensity, 1-sample*intensity, 1-sample*intensity);
                 x++;
             }
             y++;
