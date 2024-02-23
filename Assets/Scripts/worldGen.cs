@@ -19,10 +19,10 @@ public class worldGen : MonoBehaviour
 	// Some things have to be scaled to the size of the map, this is done in worldgen
 	public GameObject noise;
 	public GameObject cameraObj;
+	public GameObject firstHuman; // TODO: Placing the starting conditions should be more complicated
 	public GameObject minimap;
 	public GameObject eventSystem;
 	public GameObject oceanObj;
-	public GameObject zombieObj; 
 	 
 	public TileBase roadTile;
 	public TileBase landTile;
@@ -42,7 +42,6 @@ public class worldGen : MonoBehaviour
 	
 	private float roadRatio = 0.03f;
 	private float roadVariance = 0.01f;
-	private ulong zombieCount; // the fact this has to be a long makes me happy. 
 	public int seed; 
 	
 	/*
@@ -236,7 +235,7 @@ public class worldGen : MonoBehaviour
 		worldGenSteps.Add(("Adding other structures",createOtherTiles(),0.0f)); // Place tiles not in plots
 		worldGenSteps.Add(("Finilizing static objects",bakeStatics(),0.0f)); // Finilize static objects
 		worldGenSteps.Add(("Adding dynamic objects",createDyanmics(),0.0f)); // Add dynamic objects
-		worldGenSteps.Add(("Adding too many zombies",createUndead(),0.0f)); // Add zombies
+		worldGenSteps.Add(("Creating the antagonists",createOpponent(),0.0f)); // Add zombies
 		worldGenSteps.Add(("Preparing to start the game",startGame(),0.1f)); // Start the game
 		
 		int i = 1;
@@ -281,6 +280,7 @@ public class worldGen : MonoBehaviour
 		noise.transform.localScale = new Vector3(0.5f, 0.5f, 0);
 		noise.GetComponent<SpriteRenderer>().size = new Vector3(maxX*2, maxY*2, 0);
 		cameraObj.transform.position = new Vector3(maxX/2, maxY/2, -1);
+		firstHuman.transform.position = new Vector3(maxX/2, maxY/2, 0);
 		oceanObj.transform.position = new Vector3(maxX/2, maxY/2, 2);
 		oceanObj.transform.localScale = new Vector3(maxX*2, maxY*2, 0);
 		minimap.transform.position = new Vector3(maxX/2, maxY/2, -1);
@@ -297,9 +297,6 @@ public class worldGen : MonoBehaviour
 		// Or had "leftover" tiles in the scene
 		primaryLayer.ClearAllTiles();
 		overdrawLayer.ClearAllTiles();
-		
-		// Reset zombie counter
-		zombieCount = 0;
 		
 		Debug.Log("Basic steps complete");
 		yield return null;
@@ -1529,18 +1526,7 @@ public class worldGen : MonoBehaviour
 		yield return null;
 	}
 	
-	private void spawnZombie(float x, float y){
-		zombieCount++;
-		Quaternion rotation = Quaternion.Euler(0f,0f,Random.Range(0.0f,360.0f));
-		Instantiate(zombieObj, new Vector3(x, y, 0), rotation,transform);
-	}
-	private IEnumerator createUndead(){
-		/*for(float x = 48.98f; x < 49.7f; x+=0.04f){
-			for(float y = 49f; y < 49.6f; y+=0.04f){
-				spawnZombie(x,y);
-			}
-		}*/
-		Debug.Log("The zombie hoard has been made with "+(zombieCount) + "zombies");
+	private IEnumerator createOpponent(){
 		yield return null;
 	}
 	
@@ -1557,6 +1543,11 @@ public class worldGen : MonoBehaviour
 		AudioListener listener = cameraObj.GetComponent<AudioListener>();
 		listener.enabled = true;
 		eventSystem.SetActive(true);
+		
+		// We then load the local enviorment
+		foreach (var instance in worldLoader.instances){
+			instance.activate();
+		}
 	}
 
 	// General helpful methods

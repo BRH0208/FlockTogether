@@ -8,7 +8,7 @@ using UnityEngine.Tilemaps;
 // A checkmark means a tile that is a "friend". An X is any other tile
 // Most of the script was created automatically by Unity.
 // Notibly, this rule script overrides 1 and 2(checkmark and X figures) for use in the editor.
-public class FriendRule : RuleTile<NullRule.Neighbor> {
+public class FriendRule : RuleTile<FriendRule.Neighbor> {
 	public List<TileBase> friends;
     public class Neighbor : RuleTile.TilingRule.Neighbor {
         public const int NotFriend = 2;

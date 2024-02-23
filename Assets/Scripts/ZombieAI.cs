@@ -23,6 +23,7 @@ public class ZombieAI : MonoBehaviour
 	private Vector2 moveDir; 
 	public bool tired = false; 
 	public bool needFervorUpdate; // Is the next non-fervor call of wanderUpdate just after a fevor?
+	private bool awake;
 	private Rigidbody2D rb;
 	private float zombieSeed;
 	private bool hasFervor;
@@ -34,6 +35,8 @@ public class ZombieAI : MonoBehaviour
 	public float nextFervorCall;
 	
 	public void Update(){
+		if(!awake){return;} // We only act if we are awake.
+		
 		calcFervorFrame = false;
 		rb.AddForce(moveDir * getSpeed());
 		float angle = Mathf.Rad2Deg * Mathf.Atan2(rb.velocity.y, rb.velocity.x);
@@ -53,21 +56,25 @@ public class ZombieAI : MonoBehaviour
 			return seed;
 		}
 	}
-
-    void Start()
-    {
+	
+	// Wake this zombie, so it starts doing things
+	public void wake(){
+		awake = true;
 		tired = false;
 		if(Random.value < sleepRatio/(sleepRatio+1)){
 			tired = true;
-		}
-		rb = GetComponent<Rigidbody2D>();
-		zombieSeed = Random.Range(0.0f,2.0f*Mathf.PI);
-		_fervor = 0.0f;
-		if(tired){
 			Invoke("wanderUpdate", Random.Range(0.0f,rewanderTime*sleepRatio));
 		}else{
 			Invoke("wanderUpdate", Random.Range(0.0f,rewanderTime));
 		}
+	}
+	
+    void Start()
+    {
+		awake = false;
+		rb = GetComponent<Rigidbody2D>();
+		zombieSeed = Random.Range(0.0f,2.0f*Mathf.PI);
+		_fervor = 0.0f;
     }
 	
 	
@@ -184,11 +191,13 @@ public class ZombieAI : MonoBehaviour
 		}
 	}
 	public void OnCollisionEnter2D(Collision2D c){
+		if(!awake){return;}
 		tired = false;
 		rb.drag = passiveSlow;
 		moveDir = (c.GetContact(0).normal+moveDir).normalized;
 	}
 	public bool alert(Vector2 pos,float fervor = 1.0f){
+		if(!awake){return false;}
 		if(fervor > 1.0f){
 			fervor = 1.0f;
 		}
