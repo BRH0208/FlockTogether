@@ -1539,6 +1539,8 @@ public class worldGen : MonoBehaviour
 		while(!loading.isDone){
 			yield return null;
 		}
+		
+		worldLoader.preserveList.Add(ZombieManager.instance); // This is dumb
 		// Once the other scene is unloaded, we can activate audio and event controller
 		AudioListener listener = cameraObj.GetComponent<AudioListener>();
 		listener.enabled = true;
@@ -1548,6 +1550,7 @@ public class worldGen : MonoBehaviour
 		foreach (var instance in worldLoader.instances){
 			instance.activate();
 		}
+		
 	}
 
 	// General helpful methods

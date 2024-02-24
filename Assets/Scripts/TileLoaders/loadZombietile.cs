@@ -1,25 +1,26 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
+using Random=UnityEngine.Random;
 // This tile ONLY has zombies. no hitboxes or anything else
 // init and getPos are handled by load empty
 public class loadZombietile : loadEmpty
 {
-	private const int zombieCount = 10;
-	private List<ZombieAI> zombies;
+	private const int zombieCount = 5;
 	bool didAwake;
 	bool didGenerate;
 	ZombieManager zmanager;
-	private class JsonData
+	[Serializable]
+	public class JsonData
 	{
-	  public int seed { get; set; }
-	  public bool didGenerate { get; set; }
+	  public int seed;
+	  public bool didGenerate;
 	}
 	
 	public override void init(Vector2Int pos) {
 		didAwake = false;
 		didGenerate = false;
-		zombies = new List<ZombieAI>();
 		base.init(pos);
 	}
 	
@@ -27,15 +28,7 @@ public class loadZombietile : loadEmpty
 		return didAwake;
 	}
 	
-    // We activate our bound zombies
 	public override void activate(){
-		// Safety checks
-		if(didAwake) {return;}
-		if(!didGenerate){ return; }
-		didAwake = true;
-		foreach (ZombieAI zombie in zombies) {
-			zombie.wake();
-		}
 		base.activate();
 	}
 	// We generate by placing our zombies
@@ -43,10 +36,9 @@ public class loadZombietile : loadEmpty
 		if(didGenerate){ return; }
 		zmanager = ZombieManager.instance;
 		didGenerate = true;
+		Random.InitState(seed); // Set a seed.
 		for (int i = 0; i < zombieCount; i++){
 			GameObject zombie = zmanager.spawnZombie(pos.x+Random.value,pos.y+Random.value);
-			zombies.Add(zombie.GetComponent<ZombieAI>());
-			Debug.Log(zombies.Count);
 		}
 		base.generate(seed);
 	}

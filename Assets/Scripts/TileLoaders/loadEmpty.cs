@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
-public class loadEmpty : loadable
+public class loadEmpty : loadtile
 {	
 	private class JsonData
 	{

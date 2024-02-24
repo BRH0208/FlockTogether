@@ -23,7 +23,7 @@ public class ZombieAI : MonoBehaviour
 	private Vector2 moveDir; 
 	public bool tired = false; 
 	public bool needFervorUpdate; // Is the next non-fervor call of wanderUpdate just after a fevor?
-	private bool awake;
+	private bool awake = false;
 	private Rigidbody2D rb;
 	private float zombieSeed;
 	private bool hasFervor;
@@ -31,18 +31,27 @@ public class ZombieAI : MonoBehaviour
 	private bool calcFervorFrame; // Have we already calculated fervor this frame?
 	private float _fervor;
 	private float lastFervorUpdate;
+	private Vector2 oldPos;
 	private Vector2 fervorDirection;
 	public float nextFervorCall;
 	
 	public void Update(){
+		Vector2 pos = transform.position;
+		ZombieManager.instance.checkMovement(gameObject,oldPos,pos);
+		oldPos = pos;
 		if(!awake){return;} // We only act if we are awake.
-		
 		calcFervorFrame = false;
 		rb.AddForce(moveDir * getSpeed());
 		float angle = Mathf.Rad2Deg * Mathf.Atan2(rb.velocity.y, rb.velocity.x);
 		transform.rotation = Quaternion.Slerp(transform.rotation,Quaternion.Euler(0, 0, angle-90.0f),0.5f);
 	}
-	uint wang_hash(float time)
+	
+	// Kill this zombie
+	public void Kill(){
+		Destroy(gameObject);
+	}
+	
+	private uint wang_hash(float time)
 	{
 		unsafe {
 			float* timePtr = &time;
@@ -69,9 +78,14 @@ public class ZombieAI : MonoBehaviour
 		}
 	}
 	
+	public void deactivate(){
+		awake = false;
+		rb.velocity = Vector2.zero;// stop moving
+	}
+	
     void Start()
     {
-		awake = false;
+		Vector2 oldPos = (Vector2) transform.position;
 		rb = GetComponent<Rigidbody2D>();
 		zombieSeed = Random.Range(0.0f,2.0f*Mathf.PI);
 		_fervor = 0.0f;
@@ -83,6 +97,7 @@ public class ZombieAI : MonoBehaviour
 	}
 	// Invokes "call fervor" if appropriate
 	private void recallFervor(){
+		if(!awake){return;}
 		float fervor = getFervor();
 		float callDelay = avgCallDelay / fervor;
 		float fervorLostThisCall = fervorLostPerCall * fervor;
@@ -98,7 +113,9 @@ public class ZombieAI : MonoBehaviour
 		}
 	}
 	IEnumerator callFervor(float callDelay){
+		if(!awake){yield break;}
 		yield return new WaitForSeconds(callDelay);
+		if(!awake){yield break;}
 		nextFervorCall = 0.0f; // Assume we no longer have fervor(recall fervor called at bottom can change this)
 		float fervor = getFervor();
 		float fervorLostThisCall = fervorLostPerCall * fervor;

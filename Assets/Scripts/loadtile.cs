@@ -3,7 +3,7 @@ using UnityEngine;
 // A loadable entity exists for every tile in our loaded range. 
 // At any one time, there should only be one loadable entity per tile
 // However, if there are multiple 
-public interface loadable {
+public interface loadtile{
 	// Ran once before any other method is called. 
 	void init(Vector2Int pos);
 	

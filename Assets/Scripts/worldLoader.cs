@@ -1,5 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
+using System;
+using System.IO;
 using UnityEngine;
 
 public class worldLoader : MonoBehaviour
@@ -7,6 +9,7 @@ public class worldLoader : MonoBehaviour
 	// Instance things
 	Vector2Int pos;
 	private bool doStart;
+	public const string saveLoc = "active/";
 	
 	void OnDestroy(){
 		instances.Remove(this);
@@ -59,7 +62,7 @@ public class worldLoader : MonoBehaviour
 		public int lightBoundry;
 		public int heavyBoundry;
 		
-		public loadable script;
+		public loadtile script;
 		public bool isNew;
 		public int activateCount_old;
 		public int lightBoundry_old;
@@ -71,7 +74,7 @@ public class worldLoader : MonoBehaviour
 			heavyBoundry_old = heavyBoundry;
 			isNew = false;
 		}
-		public rangeCounter(loadable script){
+		public rangeCounter(loadtile script){
 			activateCount = 0;
 			lightBoundry = 0; // TODO: Rename this to use "count"
 			heavyBoundry = 0;
@@ -85,14 +88,14 @@ public class worldLoader : MonoBehaviour
 		}
 		
 	}
-	
+	public static List<preservable> preserveList = new List<preservable>();
 	public static List<worldLoader> instances = new List<worldLoader>();
 	private static bool needUpdate;
 	private static Dictionary<(int,int),rangeCounter> managedTiles = new Dictionary<(int,int),rangeCounter>(); 
 	// The null is so we only construct it once 
 	
-	public static loadable getLoader(Vector3Int pos){
-		loadable loader = new loadZombietile(); // TODO: Replace this
+	public static loadtile getLoader(Vector3Int pos){
+		loadtile loader = new loadZombietile(); // TODO: Replace this
 		loader.init((Vector2Int) pos); 
 		return loader;
 	}
@@ -125,6 +128,20 @@ public class worldLoader : MonoBehaviour
         }
 	}
 	
+	private static int seedGen(Vector2Int pos){
+		return pos.x+worldGen.instance.maxX*pos.y+worldGen.instance.seed;
+	}
+	private static string fileLoc(Vector2Int pos){
+		return saveLoc+"("+pos.x+","+pos.y+").sv";
+	}
+	[Serializable]
+	public class JsonData
+	{
+		public string tileData;
+		public List<string> data;
+		public List<string> dataNames;
+	}
+	// Update does a lot, including file load/unloads
 	public static void update(){
 		needUpdate = false;
 		ZombieManager zmanager = ZombieManager.instance;
@@ -136,31 +153,61 @@ public class worldLoader : MonoBehaviour
 		List<(int,int)> deleteList = new List<(int,int)>();
 		foreach (var item in managedTiles) {
 			rangeCounter counter = item.Value;
-			loadable script = counter.script;
-			Debug.DrawLine(new Vector3(item.Key.Item1,item.Key.Item2,1),new Vector3(item.Key.Item1+1,item.Key.Item2,1));
-			Debug.DrawLine(new Vector3(item.Key.Item1,item.Key.Item2,1),new Vector3(item.Key.Item1,item.Key.Item2+1,1));
-			Debug.DrawLine(new Vector3(item.Key.Item1+1,item.Key.Item2,1),new Vector3(item.Key.Item1+1,item.Key.Item2+1,1));
-			Debug.DrawLine(new Vector3(item.Key.Item1,item.Key.Item2+1,1),new Vector3(item.Key.Item1+1,item.Key.Item2+1,1));
+			loadtile script = counter.script;
+			Vector2Int pos = script.getPos();
 			
 			if(counter.heavyBoundry == 0){
 				// We remove the instance
-				if(script.modified() || zmanager.hasEntityInTile(script.getPos())){
-					script.stash();
+				if(script.modified() || zmanager.hasEntityInTile(pos)){
+					JsonData json = new JsonData();
+					json.data = new List<string>();
+					json.dataNames = new List<string>();
+					json.tileData = script.stash();
+					foreach (preservable preservationManager in preserveList){
+						if(preservationManager.wantStash(pos)){
+							json.data.Add(preservationManager.stash(pos));
+							json.dataNames.Add(preservationManager.saveName());
+						}
+					}
+					// Actually write to file
+					using (StreamWriter writer = new StreamWriter(fileLoc(pos), false)){
+						string data = JsonUtility.ToJson(json);
+						writer.Write(data); // TODO: Batch these operations so we have less files
+					}
 				}
 				deleteList.Add(item.Key);
 				continue; 
 			}
 			if(counter.lightBoundry_old == 0 && counter.lightBoundry > 0){
-				// Check for a file, because I don't have that part written yet, we just generate for now
-				script.generate(0); // TODO: Add a seed generating algorithm
-				Debug.Log("Running script " +script);
-				Debug.DrawLine(new Vector3(item.Key.Item1,item.Key.Item2,1),new Vector3(item.Key.Item1+1,item.Key.Item2+1,1));
-			
+				// TODO: Check for a save file. If it exists, load it instead of generating.
+				string filePath = fileLoc(pos);
+				if(File.Exists(filePath)){
+					string fileContents = File.ReadAllText(filePath);
+					JsonData json = JsonUtility.FromJson<JsonData>(fileContents);
+					script.load(json.tileData);
+					for(int i = 0; i < json.data.Count; i++) {
+						string name = json.data[i];
+						string data = json.dataNames[i];
+						foreach(preservable preservationManager in preserveList){
+							if(name == preservationManager.saveName()){
+								preservationManager.load(data);
+							}
+						}
+					}
+				} else {
+					script.generate(seedGen(pos)); // TODO: Add a seed generating algorithm
+				}
 			}else if(counter.lightBoundry_old > 0 && counter.lightBoundry == 0){
 				script.deactivate();
+				foreach (preservable preservationManager in preserveList){
+					preservationManager.deactivate(pos);
+				}
 			}
 			if(counter.activateCount_old == 0 && counter.activateCount > 0){
 				script.activate();
+				foreach (preservable preservationManager in preserveList){
+					preservationManager.activate(pos);
+				}
 			}
 			
 			// Update the old values
