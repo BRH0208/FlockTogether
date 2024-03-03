@@ -32,6 +32,7 @@ public class ZombieAI : MonoBehaviour
 	private float _fervor;
 	private float lastFervorUpdate;
 	private Vector2 oldPos;
+	public bool hadOldPos;
 	private Vector2 fervorDirection;
 	public float nextFervorCall;
 	
@@ -41,6 +42,7 @@ public class ZombieAI : MonoBehaviour
 			pos = oldPos;
 		} else {
 			oldPos = pos;
+			hadOldPos = true;
 		}
 		if(!awake){return;} // We only act if we are awake.
 		calcFervorFrame = false;
@@ -84,6 +86,7 @@ public class ZombieAI : MonoBehaviour
     void Start()
     {
 		oldPos = (Vector2) transform.position;
+		hadOldPos = false;
 		rb = GetComponent<Rigidbody2D>();
 		zombieSeed = Random.Range(0.0f,2.0f*Mathf.PI);
 		_fervor = 0.0f;
@@ -120,7 +123,7 @@ public class ZombieAI : MonoBehaviour
 		if(hasFervor && fervor > fervorLostThisCall){
 			int hitCount = Physics2D.CircleCastNonAlloc(rb.position,screamRadius,Vector2.zero, hitBuffer, 1f,zombieLayer);
 			if(hitCount >= 1000){
-				Debug.LogError("Increase Raycast Buffer for Zombies, "+hitCount+" hits occured");
+				Debug.Log("Increase Raycast Buffer for Zombies, "+hitCount+" hits occured");
 			}
 			for (int i = 0; i < hitCount && i < 1000; i++){
 				RaycastHit2D hit = hitBuffer[i];
@@ -130,7 +133,7 @@ public class ZombieAI : MonoBehaviour
 				}
 				ZombieAI ai = obj.GetComponent<ZombieAI>();
 				if(ai == null){
-					Debug.LogError("Hit non-zombie with zombie hitbox: " + obj);
+					Debug.Log("Hit non-zombie with zombie hitbox: " + obj);
 					continue;
 				}
 				PlayerZombieAlert alerter = PlayerZombieAlert.instance; 
