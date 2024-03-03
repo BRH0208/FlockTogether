@@ -38,7 +38,7 @@ public class ZombieAI : MonoBehaviour
 	
 	public void Update(){
 		Vector2 pos = transform.position;
-		if(ZombieManager.instance.checkMovement(gameObject,oldPos,pos)){
+		if(!hadOldPos || ZombieManager.instance.checkMovement(gameObject,oldPos,pos)){
 			pos = oldPos;
 		} else {
 			oldPos = pos;
