@@ -39,25 +39,31 @@ public class ZombieManager : MonoBehaviour, preservable
 		return zombieInstance;
 	}
 	
-	public void checkMovement(GameObject zombieInstance,Vector2 oldPos, Vector2 newPos){
+	public bool checkMovement(GameObject zombieInstance,Vector2 oldPos, Vector2 newPos){
 		Vector2Int oldPosInt = Vector2Int.FloorToInt(oldPos);
 		Vector2Int newPosInt = Vector2Int.FloorToInt(newPos);
 		if(newPosInt != oldPosInt){
-			trackZombie(zombieInstance,oldPosInt,true); // Unload at old pos
-			trackZombie(zombieInstance,newPosInt,false); // Load at new pos
+			return trackZombie(zombieInstance,oldPosInt,true) // Unload at old pos
+			&& trackZombie(zombieInstance,newPosInt,false); // Load at new pos
 		}
+		return true;
 	}
 		
-	private void trackZombie(GameObject zombieInstance, Vector2Int pos, bool untrack = false){
+	private bool trackZombie(GameObject zombieInstance, Vector2Int pos, bool untrack = false){
 		(int,int) key = (pos.x,pos.y);
 		if(!zombieLists.ContainsKey(key)){
 			zombieLists[key] = new List<GameObject>();
 		}
 		if(untrack){
-			zombieLists[key].Remove(zombieInstance);
+			bool didRemove = zombieLists[key].Remove(zombieInstance);
+			if(!didRemove){
+				Debug.LogError("Fail to remove zombie at "+key);
+				return false;
+			}
 		} else {
 			zombieLists[key].Add(zombieInstance);
 		}
+		return true;
 	}
 	public bool hasEntityInTile(Vector2Int pos){
 		(int,int) tuple = (pos.x,pos.y);
@@ -79,7 +85,6 @@ public class ZombieManager : MonoBehaviour, preservable
 			data.zombies.Add(new JsonZombie(zombiePos));
 			Destroy(obj);
 		}
-		zombieLists.Remove((pos.x,pos.y)); // We unloaded all the stashed zombies.
 		return JsonUtility.ToJson(data);
 	}
 	
@@ -110,7 +115,6 @@ public class ZombieManager : MonoBehaviour, preservable
 		foreach (JsonZombie zomb in data.zombies) {
 			spawnZombie(zomb.x,zomb.y,false); // False so we don't double-count the zombies.
 		}
-		JsonUtility.ToJson(data);
 	}
     // Start is called before the first frame update
     void Start()

@@ -141,6 +141,16 @@ public class worldLoader : MonoBehaviour
 		public List<string> data;
 		public List<string> dataNames;
 	}
+	
+	private static void unpreserve(string name,string data){
+		foreach(preservable preservationManager in preserveList){
+			if(name == preservationManager.saveName()){
+				preservationManager.load(data);
+				return;
+			}
+		}
+		Debug.LogError("Unclaimed data with name "+name+" won't be loaded");
+	}
 	// Update does a lot, including file load/unloads
 	public static void update(){
 		needUpdate = false;
@@ -179,23 +189,19 @@ public class worldLoader : MonoBehaviour
 				continue; 
 			}
 			if(counter.lightBoundry_old == 0 && counter.lightBoundry > 0){
-				// TODO: Check for a save file. If it exists, load it instead of generating.
+				// Check for a save file. If it exists, load it instead of generating.
 				string filePath = fileLoc(pos);
 				if(File.Exists(filePath)){
 					string fileContents = File.ReadAllText(filePath);
 					JsonData json = JsonUtility.FromJson<JsonData>(fileContents);
 					script.load(json.tileData);
 					for(int i = 0; i < json.data.Count; i++) {
-						string name = json.data[i];
-						string data = json.dataNames[i];
-						foreach(preservable preservationManager in preserveList){
-							if(name == preservationManager.saveName()){
-								preservationManager.load(data);
-							}
-						}
+						string data = json.data[i];
+						string name = json.dataNames[i];
+						unpreserve(name,data);
 					}
 				} else {
-					script.generate(seedGen(pos)); // TODO: Add a seed generating algorithm
+					script.generate(seedGen(pos));
 				}
 			}else if(counter.lightBoundry_old > 0 && counter.lightBoundry == 0){
 				script.deactivate();
