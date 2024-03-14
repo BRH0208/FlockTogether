@@ -5,8 +5,8 @@ using UnityEngine;
 public class MatchPos : MonoBehaviour
 {
 	public GameObject target;
-    // Update is called once per frame
-    void Update()
+    // Called after updates so that it always matches the position on the frame
+    void LateUpdate()
     {
         this.transform.position = target.transform.position;
     }

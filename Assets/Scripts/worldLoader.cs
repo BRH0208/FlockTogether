@@ -53,10 +53,10 @@ public class worldLoader : MonoBehaviour
     }
 	
 	// Static things
-	public const int activateRange = 1; // The range at which we activate. Circular. 
-	public const int lightBoundry = 2; // The range at which we load,generate and de-activate. Circular
+	public const int activateRange = 2; // The range at which we activate. Circular. 
+	public const int lightBoundry = 3; // The range at which we load,generate and de-activate. Circular
 	public const int heavyBoundry = 3; // The range at which we unload to file. Square
-	// This program will assume activateRange < lightBoundry < heavyBoundry
+	// This program will assume activateRange <= lightBoundry <= heavyBoundry
 	private class rangeCounter{
 		public int activateCount;
 		public int lightBoundry;

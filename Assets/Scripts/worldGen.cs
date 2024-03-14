@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.IO;
 
 using UnityEngine;
 using UnityEngine.Tilemaps;
@@ -267,6 +268,7 @@ public class worldGen : MonoBehaviour
 			double stepEndTime = Time.realtimeSinceStartupAsDouble; // Stop the stopwatch
 			Debug.Log("Time elapsed:" + (stepEndTime - stepStartTime)); // Log stopwatch time
 		}
+		Debug.Log ("World Created");
 		
 		inProgress = false; // There are no more steps executed after this point
     }
@@ -1539,8 +1541,19 @@ public class worldGen : MonoBehaviour
 		while(!loading.isDone){
 			yield return null;
 		}
-		
 		worldLoader.preserveList.Add(ZombieManager.instance); // This is dumb
+		
+		// WARNING: This section includes automated deletion of files
+		// We want to scan through the active saved file and remove anything irrelevant. 
+		string[] files = Directory.GetFiles(worldLoader.saveLoc);
+		foreach(string file in files){
+			if (Path.GetExtension(file) == ".sv"){
+				string deleteFile = Path.GetFullPath(file);
+				Debug.Log("Deleting: "+deleteFile);
+				File.Delete(deleteFile);
+			}
+		}
+		
 		// Once the other scene is unloaded, we can activate audio and event controller
 		AudioListener listener = cameraObj.GetComponent<AudioListener>();
 		listener.enabled = true;

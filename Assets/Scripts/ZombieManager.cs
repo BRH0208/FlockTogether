@@ -85,6 +85,8 @@ public class ZombieManager : MonoBehaviour, preservable
 			data.zombies.Add(new JsonZombie(zombiePos));
 			Destroy(obj);
 		}
+		bool didClear = zombieLists.Remove((pos.x,pos.y));
+		if(!didClear){ Debug.LogError ("Failed to clean after stash");}
 		return JsonUtility.ToJson(data);
 	}
 	

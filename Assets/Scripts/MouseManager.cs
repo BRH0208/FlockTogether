@@ -11,6 +11,7 @@ public class MouseManager : MonoBehaviour
 	public List<GameObject> humans; 
 	public Camera cam;
 	public GameObject selectedObj;
+
 	public void Update(){
 		if (Input.GetMouseButtonDown(1))
         {
@@ -30,8 +31,15 @@ public class MouseManager : MonoBehaviour
 				Debug.Log("Human " +minPlayer+" lacks a brain");
 				return;
 			}
-			ai.selected();
-			selectedObj = minPlayer;
+			if(selectedObj != null){
+				if(minPlayer == selectedObj){
+					ai.deselected();
+					selectedObj = null;
+				}
+			} else {
+				ai.selected();
+				selectedObj = minPlayer;
+			}
 		}
 		// This ordering is intentional to allow double mouse buttons to grab and command. 
 		if (Input.GetMouseButtonDown(0))

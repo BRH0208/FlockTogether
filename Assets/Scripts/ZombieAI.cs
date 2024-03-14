@@ -9,19 +9,23 @@ public class ZombieAI : MonoBehaviour
 	public static readonly RaycastHit2D[] hitBuffer = new RaycastHit2D[ 1000 ];
 	[SerializeField] private LayerMask zombieLayer;
 	
-	public static float speed = 0.05f;
+	public static float speed = 0.75f;
 	public static float activeSlow = 30.0f;
-	public static float passiveSlow = 10f;
-	public static float sleepRatio = 10f;
+	public static float passiveSlow = 0.0f;
+	public static float sleepRatio = 0.1f;
 	public static float rewanderTime = 10.0f;
-	public static float screamRadius = 0.5f;
-	public static float fervorLossRate = 0.1f;
-	public static float fervorLostPerCall = 0.2f;
-	public static float avgCallDelay = 0.5f;
-	public static float fervorSpeed = 0.5f;
+	public static float screamRadius = 0.10f;
+	public static float fervorLossRate = 0.05f;
+	public static float fervorLostPerCall = 0.25f;
+	public static float avgCallDelay = 0.20f;
+	public static float fervorSpeed = 0.25f;
+	public static float eyeDelay = 8f;
+	public static float minEyeDelay = 2f; // Eye delay at max fervor
+	
 	public bool special;
 	private Vector2 moveDir; 
 	public bool tired = false; 
+	private bool hasEyes = true; // Tracks if we react to alerts and collisions or if we are "stunned";
 	public bool needFervorUpdate; // Is the next non-fervor call of wanderUpdate just after a fevor?
 	private bool awake = false;
 	private Rigidbody2D rb;
@@ -36,6 +40,10 @@ public class ZombieAI : MonoBehaviour
 	private Vector2 fervorDirection;
 	public float nextFervorCall;
 	
+	private void rotateToVec(Vector2 vec){
+		float angle = Mathf.Rad2Deg * Mathf.Atan2(vec.y, vec.x);
+		transform.rotation = Quaternion.Euler(0,0,angle-90.0f);
+	}
 	public void Update(){
 		Vector2 pos = transform.position;
 		if(!hadOldPos || ZombieManager.instance.checkMovement(gameObject,oldPos,pos)){
@@ -46,9 +54,6 @@ public class ZombieAI : MonoBehaviour
 		}
 		if(!awake){return;} // We only act if we are awake.
 		calcFervorFrame = false;
-		rb.AddForce(moveDir * getSpeed());
-		float angle = Mathf.Rad2Deg * Mathf.Atan2(rb.velocity.y, rb.velocity.x);
-		transform.rotation = Quaternion.Slerp(transform.rotation,Quaternion.Euler(0, 0, angle-90.0f),0.5f);
 	}
 	
 	private uint wang_hash(float time)
@@ -195,10 +200,12 @@ public class ZombieAI : MonoBehaviour
 				return;
 			}
 			float frameSeed = wang_hash(Time.time)/(200.0f*Mathf.PI);
-			float personalSeed = frameSeed + zombieSeed;
+			float personalSeed = frameSeed + zombieSeed; // Note: This is an angle
 			float xSpeed = Mathf.Cos(personalSeed);
 			float ySpeed = Mathf.Sin(personalSeed);
-			moveDir = new Vector2(xSpeed,ySpeed);
+			transform.rotation = Quaternion.Euler(0,0,Mathf.Rad2Deg * personalSeed - 90.0f);
+			rb.velocity = new Vector2(0, 0); // No infinitly gaining speed
+			rb.AddForce(new Vector2(xSpeed,ySpeed)*getSpeed());
 			tired = true;
 		}else{
 			tired = false;
@@ -208,20 +215,35 @@ public class ZombieAI : MonoBehaviour
 			Invoke("wanderUpdate", rewanderTime);
 		}
 	}
+	// Importantly, this behavior is VERY slow. Zombie collisions should be limited if possible
 	public void OnCollisionEnter2D(Collision2D c){
 		if(!awake){return;}
+		if(getFervor() > 0.2f){return;} // We don't want to bump during fervor.
+		Invoke("turnEyesOn", eyeDelay*Random.value);
 		tired = false;
 		rb.drag = passiveSlow;
-		moveDir = (c.GetContact(0).normal+moveDir).normalized;
+		moveDir = Vector2.Reflect(rb.velocity,c.GetContact(0).normal).normalized; // We set our direction based on a reflection.
+		rb.velocity = new Vector2(0, 0); // No infinitly gaining speed
+		rb.AddForce(moveDir * getSpeed());
+		rotateToVec(moveDir);
+	}
+	
+	// After we alert we are "stunned" from similar changes for a few seconds. This disables that. 
+	// Intended to be used as a coroutine
+	public void turnEyesOn(){
+		hasEyes = true;
 	}
 	public bool alert(Vector2 pos,float fervor = 1.0f){
 		if(!awake){return false;}
+		if(!hasEyes) {return false;}
 		if(fervor > 1.0f){
 			fervor = 1.0f;
 		}
 		if(fervor < getFervor()){
 			return false; // We have something better we are chasing.
 		}
+		hasEyes = false;
+		Invoke("turnEyesOn", (eyeDelay*(1-fervor) + minEyeDelay)*Random.value);
 		tired = false;
 		rb.drag = passiveSlow;
 		gainFervor(fervor);
@@ -229,6 +251,9 @@ public class ZombieAI : MonoBehaviour
 		float dis = relativePos.magnitude;
 		moveDir = relativePos/dis;
 		fervorDirection = moveDir;
+		rb.velocity = new Vector2(0, 0); // No infinitly gaining speed
+		rb.AddForce(moveDir*getSpeed());
+		rotateToVec(moveDir);
 		// Delay Calling randomly so as to avoid too many calls on the same frame
 		recallFervor();
 		return true;
