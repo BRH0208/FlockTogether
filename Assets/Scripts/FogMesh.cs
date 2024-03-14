@@ -18,39 +18,40 @@ public class FogMesh : MonoBehaviour
 	
 	public class FogCutterCone {
 		// These two variables can be changed without consequence
-		private Vector2 center;
-		private float range; // The range of the cone;
+		public Vector2 center;
+		public float range; // The range of the cone;
 		
 		// The following variables are "fixed" in that they cannot be changed once a fog cutter is created
-		private float fov; // Measured in degrees. 
+		public float fov {get;} // Measured in degrees. 
 		// if fov == 180 then the view is circular. 
-		private float radPerVec; // Vectors per degree of the camera cone. 
-		private float angle; // The angle of the center of the view cone, with 0=+y,90=+x,-90=-x. 
+		public float degPerVec{get;} // Vectors per degree of the camera cone. 
+		public float angle{get;} // The angle of the center of the view cone, with 0=+y,90=+x,-90=-x. 
 		
 		// Internal variables
 		Vector2[] _rays;
-		public static Vector2 angleVec(float radians) {
+		public static Vector2 angleVec(float degrees) {
+			float radians = Mathf.Deg2Rad * degrees;
 			return new Vector2(Mathf.Sin(radians),Mathf.Cos(radians));
 		}
 
 		// Constructor
 		// Creates a view camera starting at some origin and extending in some direction, extending in both directions with an FOV. 
 		// Deg per vec indicates how many degrees are represented by a single vector. 
-		public FogCutterCone (Vector2 origin, Vector2 dir, float fov = 180f, float radPerVec = 5f) {
+		public FogCutterCone (Vector2 origin, Vector2 dir, float fov = 180f, float degPerVec = 5f) {
 			// Check for invalid objects
 			if (dir == Vector2.zero){
 				Debug.LogError("Invalid fog cutter. Cones cannot have no direction!");
 			} else if (fov > 180f){
 				Debug.LogError("Invalid fog cutter. Fov must be <= 180");
-			} else if (radPerVec <= 0){
+			} else if (degPerVec <= 0){
 				Debug.LogError("Invalid fog cutter. Degrees per vector must be positive");
 			}
 			
 			// Assign variables
 			this.center = origin;
-			this.radPerVec = radPerVec;
+			this.degPerVec = degPerVec;
 			this.fov = fov;
-			this.angle = Mathf.Deg2Rad * Vector2.SignedAngle(Vector2.up,dir);
+			this.angle = -Vector2.SignedAngle(Vector2.down,dir);
 			this.range = dir.magnitude;
 			if(this.rayCount() < 3){
 				Debug.LogError("Invalid fog cutter. Must have atleast 3 rays");
@@ -58,7 +59,7 @@ public class FogMesh : MonoBehaviour
 		}
 		
 		public int rayCount(){
-			return 2*(int) (Mathf.Floor(fov/radPerVec)) + 1;
+			return 2*(int) (Mathf.Floor(fov/degPerVec)) + 1;
 		}
 		// Get all of the vectors(without obstacle detection) that represent this object
 		// These are not scaled nor centered as those should be able to change without requiring new rays. 
@@ -72,10 +73,8 @@ public class FogMesh : MonoBehaviour
 			int count = rayCount();
 			int hcount = count/2;
 			Vector2[] rayArray = new Vector2[count];
-			rayArray[0] = angleVec(angle);
-			for (int i = 1; i <= hcount; i++){
-				rayArray[i] = angleVec(angle+radPerVec*i);
-				rayArray[i+hcount] = angleVec(angle-radPerVec*i);
+			for (int i = 0; i < count; i++){
+				rayArray[i] = angleVec(angle+degPerVec*(i-hcount));
 			}
 			return rayArray;
 		}
@@ -90,6 +89,8 @@ public class FogMesh : MonoBehaviour
 		
 	}
 	
+	// Sum the number of rays in every cone
+	// used to allocate mesh arrays.
 	private int totalRayCount(){
 		int sum = 0;
 		foreach (FogCutterCone cone in cones){
@@ -97,11 +98,24 @@ public class FogMesh : MonoBehaviour
 		}
 		return sum;
 	}
+	
+	// Calculate the number of triangles we need to cover the last triangle in 180 degree(full circle) cones. 
+	private int get180Adj(){
+		int sum = 0;
+		foreach (FogCutterCone cone in cones){
+			if (cone.fov == 180f) {
+				sum+=1;
+			}
+		}
+		return sum;
+	}	
+	
 	public void Start() {
 		cones = new List<FogCutterCone>();
 		mesh  = new Mesh();
 		GetComponent<MeshFilter>().mesh = mesh;
 	}
+	
 	public void LateUpdate()
     {
 		// Don't do anything if we don't have view cones
@@ -110,22 +124,51 @@ public class FogMesh : MonoBehaviour
 		}
 		
 		int totalRays = totalRayCount();
-		Vector3[] vertices = new Vector3[totalRays + 2]; // Each ray has 1 vertex, one vertex is origin.
+		Vector3[] vertices = new Vector3[totalRays + cones.Count]; // Each ray has 1 vertex, each cone has a vertex for origin
 		Vector2[] uv = new Vector2[vertices.Length]; // We have as many uv as verticies
-		int[] triangles = new int[(totalRays - 1) * 3]; // A number of trianges equal to total rays - 1(fenceposting problem) 
+		int[] triangles = new int[(totalRays - cones.Count + get180Adj()) * 3]; // A number of triangles.
+		// For each ray, we have a triangle, except each cone loses 1 traingle to fenceposting, except for 360 degree triangles which gain it back.
+		// Mutliplied by three as each triangles has three vertexes. 
 		
 		// We then EACH FRAME calculate the triangles for each ray.
+		int vertexIndex = 0;
+		int triangeIndex = 0;
 		foreach (FogCutterCone cone in cones) {
+			// Create the origin vertex
+			vertices[vertexIndex] = cone.center;
+			int originVertex = vertexIndex;
+			vertexIndex++;
+			
+			// Add the rays to the mesh
+			int rayNum = 0;
+			foreach (Vector2 ray in cone.getScaledRays()){
+				vertices[vertexIndex] = ray;
+				if(rayNum > 0){ // Fenceposting prevention
+					triangles[triangeIndex] = originVertex; // Origin
+					triangles[triangeIndex + 1] = vertexIndex-1; // Left
+					triangles[triangeIndex + 2] = vertexIndex; // Right
+					triangeIndex += 3; // Account for 3 more triangles.
+				}
+				vertexIndex++;
+				rayNum++;
+			}
+			// Make a true circle if it is one.
+			if(cone.fov == 180f){
+				triangles[triangeIndex] = originVertex;
+				triangles[triangeIndex + 1] = vertexIndex - 1; // The most recent vertex that actually exists
+				triangles[triangeIndex + 2] = originVertex + 1; // The leftmost vertex after the origin. 
+				triangeIndex += 3;
+			}
 			
 		}
-		vertices[0] = Vector3.zero;
-		vertices[1] = new Vector3(50,0);
-		vertices[2] = new Vector3(0,-50);
+		if(triangeIndex != triangles.Length){
+			Debug.LogError("Mismatched traingle count in Fogmesh");
+		}
+		if(vertexIndex != vertices.Length){
+			Debug.LogError("Mismatched vertex count in Fogmesh");
+		}
 		
-		triangles[0] = 0;
-		triangles[1] = 1;
-		triangles[2] = 2;
-		
+		mesh.Clear();
 		mesh.vertices = vertices;
 		mesh.uv = uv;
 		mesh.triangles = triangles;

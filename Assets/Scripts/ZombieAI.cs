@@ -7,7 +7,7 @@ public class ZombieAI : MonoBehaviour
 	// Zombies share a buffer. The buffer is used directly after it is called and all zombies are handles on the
 	// same thread(because unity).
 	public static readonly RaycastHit2D[] hitBuffer = new RaycastHit2D[ 1000 ];
-	[SerializeField] private LayerMask zombieLayer;
+	[SerializeField] private LayerMask alertBlockLayer;
 	
 	public static float speed = 0.75f;
 	public static float activeSlow = 30.0f;
@@ -126,7 +126,7 @@ public class ZombieAI : MonoBehaviour
 		float fervor = getFervor();
 		float fervorLostThisCall = fervorLostPerCall * fervor;
 		if(hasFervor && fervor > fervorLostThisCall){
-			int hitCount = Physics2D.CircleCastNonAlloc(rb.position,screamRadius,Vector2.zero, hitBuffer, 1f,zombieLayer);
+			int hitCount = Physics2D.CircleCastNonAlloc(rb.position,screamRadius,Vector2.zero, hitBuffer, 1f,alertBlockLayer);
 			if(hitCount >= 1000){
 				Debug.Log("Increase Raycast Buffer for Zombies, "+hitCount+" hits occured");
 			}
@@ -138,7 +138,7 @@ public class ZombieAI : MonoBehaviour
 				}
 				ZombieAI ai = obj.GetComponent<ZombieAI>();
 				if(ai == null){
-					Debug.Log("Hit non-zombie with zombie hitbox: " + obj);
+					// We could hit any number of dynamic objects, we only want to interact with zombies
 					continue;
 				}
 				PlayerZombieAlert alerter = PlayerZombieAlert.instance; 

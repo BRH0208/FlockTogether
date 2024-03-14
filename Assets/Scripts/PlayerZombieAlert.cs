@@ -15,7 +15,7 @@ public class PlayerZombieAlert : MonoBehaviour
 	public void alertAt(ZombieAI ai, Vector2 pos,Vector2 otherPos, float amt){
 		Vector2 relativeVector = otherPos-pos;
 		RaycastHit2D hit = Physics2D.Raycast(pos, relativeVector,relativeVector.magnitude,alertBlockLayer);
-		if(!(hit.collider != null)){
+		if(!(hit.collider == null)){
 			//Debug.DrawLine((Vector3) pos,(Vector3) otherPos);
 			ai.alert((Vector2) pos,amt);
 		}

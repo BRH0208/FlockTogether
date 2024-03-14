@@ -11,10 +11,10 @@ TagManager:
   - PlayerInteract
   - Water
   - UI
-  - ZombieListener
+  - Mask
   - OpaqueBlocker
   - Fog
-  - 
+  - DynamicObjects
   - 
   - 
   - 
