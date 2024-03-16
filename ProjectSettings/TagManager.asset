@@ -41,11 +41,20 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: MASK
+    uniqueID: 3543141375
+    locked: 0
   - name: Noise
     uniqueID: 1599325269
     locked: 0
   - name: Zombies
     uniqueID: 1580663929
+    locked: 0
+  - name: Player
+    uniqueID: 3709024269
+    locked: 0
+  - name: Objects
+    uniqueID: 3792652087
     locked: 0
   - name: Overlay
     uniqueID: 2242962269

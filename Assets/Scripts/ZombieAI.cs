@@ -6,8 +6,8 @@ public class ZombieAI : MonoBehaviour
 {
 	// Zombies share a buffer. The buffer is used directly after it is called and all zombies are handles on the
 	// same thread(because unity).
-	public static readonly RaycastHit2D[] hitBuffer = new RaycastHit2D[ 1000 ];
-	[SerializeField] private LayerMask alertBlockLayer;
+	public const int bufferSize = 1000;
+	public static readonly RaycastHit2D[] hitBuffer = new RaycastHit2D[bufferSize];
 	
 	public static float speed = 0.75f;
 	public static float activeSlow = 30.0f;
@@ -126,11 +126,11 @@ public class ZombieAI : MonoBehaviour
 		float fervor = getFervor();
 		float fervorLostThisCall = fervorLostPerCall * fervor;
 		if(hasFervor && fervor > fervorLostThisCall){
-			int hitCount = Physics2D.CircleCastNonAlloc(rb.position,screamRadius,Vector2.zero, hitBuffer, 1f,alertBlockLayer);
-			if(hitCount >= 1000){
+			int hitCount = Physics2D.CircleCast(rb.position,screamRadius,Vector2.zero, GP.i.alertBlockFilter, hitBuffer, 1f);
+			if(hitCount >= bufferSize){
 				Debug.Log("Increase Raycast Buffer for Zombies, "+hitCount+" hits occured");
 			}
-			for (int i = 0; i < hitCount && i < 1000; i++){
+			for (int i = 0; i < hitCount && i < bufferSize; i++){
 				RaycastHit2D hit = hitBuffer[i];
 				GameObject obj = hit.transform.gameObject;
 				if(obj == gameObject){
@@ -141,8 +141,7 @@ public class ZombieAI : MonoBehaviour
 					// We could hit any number of dynamic objects, we only want to interact with zombies
 					continue;
 				}
-				PlayerZombieAlert alerter = PlayerZombieAlert.instance; 
-				alerter.alertAt(ai, (Vector2) transform.position,(Vector2) obj.transform.position,fervor - fervorLostThisCall);
+				PlayerZombieAlert.alertAt(ai, (Vector2) transform.position,(Vector2) obj.transform.position,fervor - fervorLostThisCall);
 			}
 			recallFervor();
 		}
@@ -233,7 +232,8 @@ public class ZombieAI : MonoBehaviour
 	public void turnEyesOn(){
 		hasEyes = true;
 	}
-	public bool alert(Vector2 pos,float fervor = 1.0f){
+	
+	public bool wouldAlert(Vector2 pos, float fervor = 1.0f){
 		if(!awake){return false;}
 		if(!hasEyes) {return false;}
 		if(fervor > 1.0f){
@@ -241,6 +241,12 @@ public class ZombieAI : MonoBehaviour
 		}
 		if(fervor < getFervor()){
 			return false; // We have something better we are chasing.
+		}
+		return true;
+	}
+	public bool alert(Vector2 pos,float fervor = 1.0f){
+		if(!wouldAlert(pos,fervor)){
+			return false;
 		}
 		hasEyes = false;
 		Invoke("turnEyesOn", (eyeDelay*(1-fervor) + minEyeDelay)*Random.value);

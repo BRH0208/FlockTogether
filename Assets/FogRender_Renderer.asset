@@ -15,9 +15,9 @@ MonoBehaviour:
   m_Active: 1
   settings:
     passTag: Mask
-    Event: 250
+    Event: 500
     filterSettings:
-      RenderQueueType: 0
+      RenderQueueType: 1
       LayerMask:
         serializedVersion: 2
         m_Bits: 64
@@ -82,18 +82,18 @@ MonoBehaviour:
   m_AssetVersion: 2
   m_OpaqueLayerMask:
     serializedVersion: 2
-    m_Bits: 447
+    m_Bits: 959
   m_TransparentLayerMask:
     serializedVersion: 2
-    m_Bits: 447
+    m_Bits: 191
   m_DefaultStencilState:
     overrideStencilState: 0
-    stencilReference: 1
+    stencilReference: 0
     stencilCompareFunction: 8
     passOperation: 2
     failOperation: 0
     zFailOperation: 0
-  m_ShadowTransparentReceive: 1
+  m_ShadowTransparentReceive: 0
   m_RenderingMode: 0
   m_DepthPrimingMode: 0
   m_CopyDepthMode: 1
@@ -114,12 +114,12 @@ MonoBehaviour:
   m_Active: 1
   settings:
     passTag: SeeThrough
-    Event: 250
+    Event: 500
     filterSettings:
-      RenderQueueType: 0
+      RenderQueueType: 1
       LayerMask:
         serializedVersion: 2
-        m_Bits: 512
+        m_Bits: 959
       PassNames: []
     overrideMaterial: {fileID: 0}
     overrideMaterialPassIndex: 0
@@ -132,7 +132,7 @@ MonoBehaviour:
     stencilSettings:
       overrideStencilState: 1
       stencilReference: 1
-      stencilCompareFunction: 6
+      stencilCompareFunction: 3
       passOperation: 0
       failOperation: 0
       zFailOperation: 0

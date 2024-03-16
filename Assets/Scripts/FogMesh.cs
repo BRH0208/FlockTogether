@@ -6,6 +6,11 @@ public class FogMesh : MonoBehaviour
 {
 	public List<FogCutterCone> cones; 
 	private Mesh mesh;
+	public ContactFilter2D fogBlocker;
+	private static RaycastHit2D[] rayBuffer;
+	private const int bufferSize = 1; // We only care about the first hit, so we have a cap of 1.
+	
+	
 	// Add a cone to be tracked by this sprite
 	public void addCone(FogCutterCone cone){
 		cones.Add(cone);
@@ -79,10 +84,10 @@ public class FogMesh : MonoBehaviour
 			return rayArray;
 		}
 		
-		public Vector2[] getScaledRays(){
+		public Vector2[] getCenteredRays(){
 			Vector2[] rays = getRays();
 			for(int i = 0; i < rays.Length; i++){
-				rays[i] = rays[i] * range + center; 
+				rays[i] = rays[i] + center; 
 			}
 			return rays;
 		}
@@ -114,6 +119,7 @@ public class FogMesh : MonoBehaviour
 		cones = new List<FogCutterCone>();
 		mesh  = new Mesh();
 		GetComponent<MeshFilter>().mesh = mesh;
+		rayBuffer = new RaycastHit2D[bufferSize];
 	}
 	
 	public void LateUpdate()
@@ -141,8 +147,15 @@ public class FogMesh : MonoBehaviour
 			
 			// Add the rays to the mesh
 			int rayNum = 0;
-			foreach (Vector2 ray in cone.getScaledRays()){
-				vertices[vertexIndex] = ray;
+			foreach (Vector2 ray in cone.getRays()){
+				Vector2 rayHit;
+				int hits = Physics2D.Raycast(cone.center,ray,fogBlocker,rayBuffer,cone.range);
+				if(hits == 0){
+					rayHit = cone.center + ray * cone.range;
+				} else {
+					rayHit = cone.center + ray * rayBuffer[0].distance; // We only take the position of the first thing we hit. 
+				}
+				vertices[vertexIndex] = rayHit;
 				if(rayNum > 0){ // Fenceposting prevention
 					triangles[triangeIndex] = originVertex; // Origin
 					triangles[triangeIndex + 1] = vertexIndex-1; // Left
