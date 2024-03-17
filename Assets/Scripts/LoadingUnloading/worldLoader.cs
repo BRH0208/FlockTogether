@@ -88,7 +88,7 @@ public class worldLoader : MonoBehaviour
 		}
 		
 	}
-	public static List<preservable> preserveList = new List<preservable>();
+	
 	public static List<worldLoader> instances = new List<worldLoader>();
 	private static bool needUpdate;
 	private static Dictionary<(int,int),rangeCounter> managedTiles = new Dictionary<(int,int),rangeCounter>(); 
@@ -138,23 +138,13 @@ public class worldLoader : MonoBehaviour
 	public class JsonData
 	{
 		public string tileData;
-		public List<string> data;
-		public List<string> dataNames;
+		public string objData;
 	}
 	
-	private static void unpreserve(string name,string data){
-		foreach(preservable preservationManager in preserveList){
-			if(name == preservationManager.saveName()){
-				preservationManager.load(data);
-				return;
-			}
-		}
-		Debug.LogError("Unclaimed data with name "+name+" won't be loaded");
-	}
 	// Update does a lot, including file load/unloads
 	public static void update(){
+		ObjectManager objMan = ObjectManager.instance; // Shorthand
 		needUpdate = false;
-		ZombieManager zmanager = ZombieManager.instance;
 		
 		if(managedTiles == null){
 			managedTiles = new Dictionary<(int,int),rangeCounter>();
@@ -168,17 +158,10 @@ public class worldLoader : MonoBehaviour
 			
 			if(counter.heavyBoundry == 0){
 				// We remove the instance
-				if(script.modified() || zmanager.hasEntityInTile(pos)){
+				if(script.modified() || objMan.hasEntityInTile(pos)){
 					JsonData json = new JsonData();
-					json.data = new List<string>();
-					json.dataNames = new List<string>();
+					json.objData = objMan.stash(pos);
 					json.tileData = script.stash();
-					foreach (preservable preservationManager in preserveList){
-						if(preservationManager.wantStash(pos)){
-							json.data.Add(preservationManager.stash(pos));
-							json.dataNames.Add(preservationManager.saveName());
-						}
-					}
 					// Actually write to file
 					using (StreamWriter writer = new StreamWriter(fileLoc(pos), false)){
 						string data = JsonUtility.ToJson(json);
@@ -195,25 +178,17 @@ public class worldLoader : MonoBehaviour
 					string fileContents = File.ReadAllText(filePath);
 					JsonData json = JsonUtility.FromJson<JsonData>(fileContents);
 					script.load(json.tileData);
-					for(int i = 0; i < json.data.Count; i++) {
-						string data = json.data[i];
-						string name = json.dataNames[i];
-						unpreserve(name,data);
-					}
+					objMan.load(json.objData);
 				} else {
 					script.generate(seedGen(pos));
 				}
 			}else if(counter.lightBoundry_old > 0 && counter.lightBoundry == 0){
 				script.deactivate();
-				foreach (preservable preservationManager in preserveList){
-					preservationManager.deactivate(pos);
-				}
+				objMan.deactivate(pos);
 			}
 			if(counter.activateCount_old == 0 && counter.activateCount > 0){
 				script.activate();
-				foreach (preservable preservationManager in preserveList){
-					preservationManager.activate(pos);
-				}
+				objMan.activate(pos);
 			}
 			
 			// Update the old values

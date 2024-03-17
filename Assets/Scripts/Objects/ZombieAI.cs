@@ -35,8 +35,6 @@ public class ZombieAI : MonoBehaviour
 	private bool calcFervorFrame; // Have we already calculated fervor this frame?
 	private float _fervor;
 	private float lastFervorUpdate;
-	private Vector2 oldPos;
-	public bool hadOldPos;
 	private Vector2 fervorDirection;
 	public float nextFervorCall;
 	
@@ -45,15 +43,7 @@ public class ZombieAI : MonoBehaviour
 		transform.rotation = Quaternion.Euler(0,0,angle-90.0f);
 	}
 	public void Update(){
-		Vector2 pos = transform.position;
-		if(!hadOldPos || ZombieManager.instance.checkMovement(gameObject,oldPos,pos)){
-			pos = oldPos;
-		} else {
-			oldPos = pos;
-			hadOldPos = true;
-		}
-		if(!awake){return;} // We only act if we are awake.
-		calcFervorFrame = false;
+		calcFervorFrame = false; 
 	}
 	
 	private uint wang_hash(float time)
@@ -90,8 +80,6 @@ public class ZombieAI : MonoBehaviour
 	
     void Start()
     {
-		oldPos = (Vector2) transform.position;
-		hadOldPos = false;
 		rb = GetComponent<Rigidbody2D>();
 		zombieSeed = Random.Range(0.0f,2.0f*Mathf.PI);
 		_fervor = 0.0f;

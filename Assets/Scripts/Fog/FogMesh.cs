@@ -124,6 +124,7 @@ public class FogMesh : MonoBehaviour
 	
 	public void LateUpdate()
     {
+		if(cones == null){return;} // In rare cases, we can late update before we start.
 		// Don't do anything if we don't have view cones
 		if(cones.Count <= 0){
 			return;

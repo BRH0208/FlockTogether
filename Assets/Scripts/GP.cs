@@ -23,8 +23,13 @@ public class GP : MonoBehaviour
 	// It should not include the target of the zombie's vision.
 	public ContactFilter2D alertBlockFilter;
 	
+	// Used in Vehicle Manger. Inludes all colors that it is reasonable for a car to have
+	public List<Color> carPaint;
 	/*
 		World State variables
 		Variables that are part of the state of the world. 
 	*/
+	
+	// Used in ZombieManager. This is the start of the infection, the base model from which all zombies are derived
+	public GameObject zombiePrefab; 
 }

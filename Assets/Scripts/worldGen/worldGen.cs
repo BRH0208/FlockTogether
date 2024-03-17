@@ -300,6 +300,9 @@ public class worldGen : MonoBehaviour
 		primaryLayer.ClearAllTiles();
 		overdrawLayer.ClearAllTiles();
 		
+		// Set the number of zombies to zero
+		ZombieManager.instance.zombieCount = 0;
+		
 		Debug.Log("Basic steps complete");
 		yield return null;
 	}
@@ -1541,16 +1544,15 @@ public class worldGen : MonoBehaviour
 		while(!loading.isDone){
 			yield return null;
 		}
-		worldLoader.preserveList.Add(ZombieManager.instance); // This is dumb
 		
 		// WARNING: This section includes automated deletion of files
 		// We want to scan through the active saved file and remove anything irrelevant. 
 		string[] files = Directory.GetFiles(worldLoader.saveLoc);
 		foreach(string file in files){
-			if (Path.GetExtension(file) == ".sv"){
+			if (Path.GetExtension(file) == ".sv"){ // ONLY deletes files that end in .sv
 				string deleteFile = Path.GetFullPath(file);
 				Debug.Log("Deleting: "+deleteFile);
-				File.Delete(deleteFile);
+				File.Delete(deleteFile); // Limit damage with nonrecursive delete.
 			}
 		}
 		
