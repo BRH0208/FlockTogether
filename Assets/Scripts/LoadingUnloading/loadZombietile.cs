@@ -7,7 +7,7 @@ using Random=UnityEngine.Random;
 // init and getPos are handled by load empty
 public class loadZombietile : loadEmpty
 {
-	private const int zombieCount = 50;
+	private const int zombieCount = 1;
 	bool didAwake;
 	bool didGenerate;
 	ZombieManager zmanager;

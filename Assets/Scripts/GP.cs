@@ -9,7 +9,7 @@ public class GP : MonoBehaviour
 {
 	public static GP i; // Instance of global properties 
     // Start is called before the first frame update
-    void Start()
+    void Awake() // Happends before start so we must do on awake. In theory this should never be asleep
     {
         i = this;
     }
@@ -23,6 +23,10 @@ public class GP : MonoBehaviour
 	// It should not include the target of the zombie's vision.
 	public ContactFilter2D alertBlockFilter;
 	
+	// Used by seat to check if the player can fit somewhere. 
+	// Should include players and walls but not zombies. 
+	public ContactFilter2D physicsBlock; 
+
 	// Used in Vehicle Manger. Inludes all colors that it is reasonable for a car to have
 	public List<Color> carPaint;
 	/*

@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4259779520196623864}
   - component: {fileID: 7602186149376938393}
+  - component: {fileID: 5021486550883103628}
   m_Layer: 6
   m_Name: PerceptionMask
   m_TagString: Untagged
@@ -84,6 +85,18 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!114 &5021486550883103628
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2117058804574458615}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f6fe430f9dd2ae04e88cbbbefdbafacd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &4876241152902255321
 GameObject:
   m_ObjectHideFlags: 0
@@ -95,6 +108,7 @@ GameObject:
   - component: {fileID: 8402285232300814806}
   - component: {fileID: 5161241134137756134}
   - component: {fileID: 6060199383650546404}
+  - component: {fileID: 5302528045886799044}
   m_Layer: 2
   m_Name: ZombieDetector
   m_TagString: Untagged
@@ -164,6 +178,18 @@ CircleCollider2D:
   m_Offset: {x: 0, y: 0}
   serializedVersion: 2
   m_Radius: 1
+--- !u!114 &5302528045886799044
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4876241152902255321}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f6fe430f9dd2ae04e88cbbbefdbafacd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &5041446616873710991
 GameObject:
   m_ObjectHideFlags: 0
@@ -178,7 +204,7 @@ GameObject:
   - component: {fileID: 7970837537812315740}
   - component: {fileID: 2519843387365993685}
   - component: {fileID: 7586609731703487278}
-  m_Layer: 2
+  m_Layer: 10
   m_Name: Human
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -308,7 +334,9 @@ MonoBehaviour:
   passiveSlow: 50
   maxSpeed: 2
   roatationRate: 450
-  orderCompleteDistance: 0.01
+  isDeactive: 0
+  movePrecision: 0.01
+  interactPrecision: 0.015
 --- !u!50 &2519843387365993685
 Rigidbody2D:
   serializedVersion: 4
@@ -396,6 +424,7 @@ MonoBehaviour:
   dist: 2
   fov: 180
   degPerVec: 5
+  doCone: 0
 --- !u!1 &7855792404287555138
 GameObject:
   m_ObjectHideFlags: 0
@@ -406,7 +435,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5235214716850208935}
   - component: {fileID: 1621546255940403869}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: SelectIcon
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -435,7 +464,7 @@ SpriteRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7855792404287555138}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 0
   m_ReceiveShadows: 0
   m_DynamicOccludee: 1
@@ -490,7 +519,8 @@ GameObject:
   m_Component:
   - component: {fileID: 2953347564585314341}
   - component: {fileID: 8992739033792393124}
-  m_Layer: 0
+  - component: {fileID: 3149793499235726457}
+  m_Layer: 2
   m_Name: Circle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -564,3 +594,15 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!114 &3149793499235726457
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8160619286936074930}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f6fe430f9dd2ae04e88cbbbefdbafacd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

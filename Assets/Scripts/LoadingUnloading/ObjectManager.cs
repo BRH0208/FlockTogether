@@ -45,7 +45,7 @@ public class ObjectManager : MonoBehaviour
 		if(untrack){
 			bool didRemove = objectLists[key].Remove(instance);
 			if(!didRemove){
-				Debug.LogError("ObjectManager failed to remove object at "+key+" with name \""+instance.name+"\"");
+				Debug.LogError("ObjectManager failed to remove object at "+key+" with name \""+instance.obj.name+"\"");
 				return false;
 			}
 		} else {

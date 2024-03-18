@@ -20,7 +20,6 @@ public class worldGen : MonoBehaviour
 	// Some things have to be scaled to the size of the map, this is done in worldgen
 	public GameObject noise;
 	public GameObject cameraObj;
-	public GameObject firstHuman; // TODO: Placing the starting conditions should be more complicated
 	public GameObject minimap;
 	public GameObject eventSystem;
 	public GameObject oceanObj;
@@ -282,7 +281,6 @@ public class worldGen : MonoBehaviour
 		noise.transform.localScale = new Vector3(0.5f, 0.5f, 0);
 		noise.GetComponent<SpriteRenderer>().size = new Vector3(maxX*2, maxY*2, 0);
 		cameraObj.transform.position = new Vector3(maxX/2, maxY/2, -1);
-		firstHuman.transform.position = new Vector3(maxX/2, maxY/2, 0);
 		oceanObj.transform.position = new Vector3(maxX/2, maxY/2, 2);
 		oceanObj.transform.localScale = new Vector3(maxX*2, maxY*2, 0);
 		minimap.transform.position = new Vector3(maxX/2, maxY/2, -1);

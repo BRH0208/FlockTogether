@@ -2,23 +2,29 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class HumanAI : MonoBehaviour
+public class HumanAI : MonoBehaviour, commandable
 {
+	
     private Vector2 navGoal;
 	private bool hasNavGoal;
+	
+	private interactable interact;
 	
 	public float activeSlow = 10.0f;
 	public float passiveSlow = 1.0f;
 	private Rigidbody2D rb;
 	public float maxSpeed = 1.0f;
 	public float roatationRate = 0.1f;
-	public float orderCompleteDistance = 0.01f;
-	
+	public bool isDeactive;
+	public float movePrecision = 0.01f;
+	public float interactPrecision = 0.015f;
+	public GameObject obj{get{return gameObject;}}
 	
 	// This human was selected by a player
 	public void selected(){
 		// Turn on the selected indicator
-		GameObject selectObj = GameObject.Find("SelectIcon");
+		GameObject selectObj = transform.Find("SelectIcon").gameObject;
+		if(selectObj == null){return;}
 		Renderer selected = selectObj.GetComponent<SpriteRenderer>();
 		selected.enabled = true;
 	}
@@ -26,15 +32,23 @@ public class HumanAI : MonoBehaviour
 	// This human is no longer selected by a player
 	public void deselected(){
 		// Turn off the selected indicator
-		GameObject selectObj = GameObject.Find("SelectIcon");
+		GameObject selectObj = transform.Find("SelectIcon").gameObject;
+		if(selectObj == null){return;}
 		Renderer selected = selectObj.GetComponent<SpriteRenderer>();
 		selected.enabled = false;
 	}
 	
-	// This human was told to move to a position
-	public void commandMove(Vector2 pos){
-		navGoal = pos;
+	public void commandInteractable(interactable interact){
+		commandEmpty(interact.obj.transform.position); // We first move to it
+		this.interact = interact; // We set this as our interact
+	}
+	
+	// Default is move
+	public void commandEmpty(Vector2 clickedPos){
+
 		hasNavGoal = true;
+		navGoal = clickedPos;
+		this.interact = null;
 	}
 	
 	// Get the current speed
@@ -42,16 +56,26 @@ public class HumanAI : MonoBehaviour
 		return maxSpeed;
 	}
 	
+	public bool hasTag(string tag){
+		if(tag == "sit") {return true;} // Humans can be commanded to sit in a chair
+		return false;
+	}
+	
 	public void Update(){
+		if(isDeactive){return;}
 		if(hasNavGoal){ // If we are currently navigating towards a position
 			
 			Vector2 relativePos = (navGoal - (Vector2) transform.position);
 			float distance = relativePos.magnitude;
 			float speed = getSpeed();
-			if(distance < orderCompleteDistance){
+			if(distance < movePrecision || (distance < interactPrecision && interact != null)){
 				// Stop moving
 				rb.drag = activeSlow;
 				hasNavGoal = false;
+				if(interact != null){
+					interact.interact(this); // Do the interaction
+					interact = null;
+				}
 			}else{
 				// Move more
 				relativePos = relativePos / distance;
@@ -68,5 +92,26 @@ public class HumanAI : MonoBehaviour
 	public void Start(){
 		rb = GetComponent<Rigidbody2D>();
 		deselected(); // We begin deselected
+		isDeactive = false;
+		MouseManager.track(this);
+	}
+	
+	public void OnSit(Seat seat){
+		deselected(); // We deselect ourselves.
+		MouseManager.commandedObjects.Remove(this); // We can no longer be commanded
+		isDeactive = true;
+		
+		// Collider
+		Collider2D[] colliders = GetComponents<Collider2D>();
+		foreach (Collider2D col in colliders) {col.enabled = false;}
+	}
+	
+	public void OnDesit(Seat seat){
+		MouseManager.track(this); // We can no longer be commanded
+		isDeactive = false;
+		
+		// Re-enable colliders
+		Collider2D[] colliders = GetComponents<Collider2D>();
+		foreach (Collider2D col in colliders) {col.enabled = true;}
 	}
 }

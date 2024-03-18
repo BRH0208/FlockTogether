@@ -27,7 +27,6 @@ public class ZombieManager : MonoBehaviour, preservationSystem
 		GameObject zombieInstance = Instantiate(GP.i.zombiePrefab, new Vector3(x, y, 0), rotation,transform);
 		Vector2Int position = Vector2Int.FloorToInt(new Vector2(x,y));
 		preserveZombie zombiePreserve = zombieInstance.GetComponent<preserveZombie>();
-		zombiePreserve.creation();
 		if(zombiePreserve == null){
 			Debug.LogError("Zombie was created without having zombie preserve object");
 		}
@@ -36,31 +35,31 @@ public class ZombieManager : MonoBehaviour, preservationSystem
 		
 	}
 	// Take all the zombies in a position and remove them, then send the stored data to JSON. 
-	public string stash(preservable obj){
+	public string stash(preservable instance){
 		// Destroy the zombie
-		Destroy(obj.gameObject); // We just kill it
+		Destroy(instance.obj); // We just kill it
 		
 		// Save the object
 		JsonObject data = new JsonObject();
-		data.x = obj.transform.position.x;
-		data.y = obj.transform.position.y;
+		data.x = instance.obj.transform.position.x;
+		data.y = instance.obj.transform.position.y;
 		return JsonUtility.ToJson(data);
 	}
 	
-	public void activate(preservable obj){
-		ZombieAI ai = obj.gameObject.GetComponent<ZombieAI>();
+	public void activate(preservable instance){
+		ZombieAI ai = instance.obj.GetComponent<ZombieAI>();
 		if(ai == null){
-			Debug.LogError("Cannot Activate at ("+obj.transform.position.x+","+obj.transform.position.y+"): ZombieManager preservable attached to gameObject without ZombieAI");
+			Debug.LogError("Cannot Activate at ("+instance.obj.transform.position.x+","+instance.obj.transform.position.y+"): ZombieManager preservable attached to gameObject without ZombieAI");
 		} else {
 			ai.wake();
 		}
 		return;
 	}
 	
-	public void deactivate(preservable obj){
-		ZombieAI ai = obj.gameObject.GetComponent<ZombieAI>();
+	public void deactivate(preservable instance){
+		ZombieAI ai = instance.obj.GetComponent<ZombieAI>();
 		if(ai == null){
-			Debug.LogError("Cannot Deactivate at ("+obj.transform.position.x+","+obj.transform.position.y+"): ZombieManager preservable attached to gameObject without ZombieAI");
+			Debug.LogError("Cannot Deactivate at ("+instance.obj.transform.position.x+","+instance.obj.transform.position.y+"): ZombieManager preservable attached to gameObject without ZombieAI");
 		} else {
 			ai.deactivate();
 		}
@@ -83,7 +82,7 @@ public class ZombieManager : MonoBehaviour, preservationSystem
 	// The name to display for readability
 	public string displayName{get{return "Zombie";}}
 	
-	void Start()
+	void Awake()
     {
 		ZombieManager.instance = this; 
 	}
