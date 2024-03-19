@@ -4,15 +4,22 @@ using UnityEngine;
 
 public interface commandable
 {
+	enum Mode {
+		Normal, // Default 
+		Sprint, // Usually activated with double tap, travel faster than normal at some cost
+		Sneak, // Activated with slow tap, Travel slower but be seen from less distance
+	}
 	// Called on select and deselect respectively
 	void selected();
 	void deselected();
 	
 	// Commandable entities should be able to respond to tags representing what they are
-	// Tags include "Human", "Vehicle" // TODO: This should be an enum
+	// Tags include "Human", "Vehicle", "Inactive" // TODO: Make this an enum
 	bool hasTag(string tag);
 	
-	void commandEmpty(Vector2 clickedPos); // We got a command without an associated interactable
-	void commandInteractable(interactable interact); // We got a command to interact with interactable
+	// In a command, sprint implies we want to do this action quickly. 
+	// It will have different effects depending on the commandable.
+	void commandEmpty(Vector2 clickedPos, Mode mode); // We got a command without an associated interactable
+	void commandInteractable(interactable interact, Mode mode); // We got a command to interact with interactable
 	GameObject obj{get;}
 }

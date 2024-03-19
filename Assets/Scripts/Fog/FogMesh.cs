@@ -10,6 +10,7 @@ public class FogMesh : MonoBehaviour
 	private static RaycastHit2D[] rayBuffer;
 	private const int bufferSize = 1; // We only care about the first hit, so we have a cap of 1.
 	
+	public static FogMesh instance;
 	
 	// Add a cone to be tracked by this sprite
 	public void addCone(FogCutterCone cone){
@@ -51,7 +52,7 @@ public class FogMesh : MonoBehaviour
 			} else if (degPerVec <= 0){
 				Debug.LogError("Invalid fog cutter. Degrees per vector must be positive");
 			}
-			
+			Debug.Log("new cone "+FogMesh.instance.cones.Count);
 			// Assign variables
 			this.center = origin;
 			this.degPerVec = degPerVec;
@@ -120,6 +121,7 @@ public class FogMesh : MonoBehaviour
 		mesh  = new Mesh();
 		GetComponent<MeshFilter>().mesh = mesh;
 		rayBuffer = new RaycastHit2D[bufferSize];
+		instance = this;
 	}
 	
 	public void LateUpdate()

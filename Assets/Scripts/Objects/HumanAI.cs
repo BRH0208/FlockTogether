@@ -13,9 +13,11 @@ public class HumanAI : MonoBehaviour, commandable
 	public float activeSlow = 10.0f;
 	public float passiveSlow = 1.0f;
 	private Rigidbody2D rb;
-	public float maxSpeed = 1.0f;
+	public float walkSpeed = 1.0f;
+	public float sprintMod = 1.2f;
 	public float roatationRate = 0.1f;
 	public bool isDeactive;
+	public commandable.Mode mode;
 	public float movePrecision = 0.01f;
 	public float interactPrecision = 0.015f;
 	public GameObject obj{get{return gameObject;}}
@@ -23,37 +25,33 @@ public class HumanAI : MonoBehaviour, commandable
 	// This human was selected by a player
 	public void selected(){
 		// Turn on the selected indicator
-		GameObject selectObj = transform.Find("SelectIcon").gameObject;
-		if(selectObj == null){return;}
-		Renderer selected = selectObj.GetComponent<SpriteRenderer>();
-		selected.enabled = true;
+		GP.i.selectIconEnabled(gameObject, true);
 	}
 	
 	// This human is no longer selected by a player
 	public void deselected(){
 		// Turn off the selected indicator
-		GameObject selectObj = transform.Find("SelectIcon").gameObject;
-		if(selectObj == null){return;}
-		Renderer selected = selectObj.GetComponent<SpriteRenderer>();
-		selected.enabled = false;
+		GP.i.selectIconEnabled(gameObject, false);
 	}
 	
-	public void commandInteractable(interactable interact){
-		commandEmpty(interact.obj.transform.position); // We first move to it
+	public void commandInteractable(interactable interact,commandable.Mode mode){
+		commandEmpty(interact.obj.transform.position,mode); // We first move to it
 		this.interact = interact; // We set this as our interact
 	}
 	
 	// Default is move
-	public void commandEmpty(Vector2 clickedPos){
-
+	public void commandEmpty(Vector2 clickedPos,commandable.Mode mode){
+		this.mode = mode;
 		hasNavGoal = true;
 		navGoal = clickedPos;
 		this.interact = null;
 	}
 	
-	// Get the current speed
+	// Get the human's movement speed
 	public float getSpeed(){
-		return maxSpeed;
+		return walkSpeed * 
+			(mode == commandable.Mode.Sprint ? sprintMod : 1) * 
+			(mode == commandable.Mode.Sneak ? 1.0f/sprintMod : 1); // If we are sprinting, multiply by sprint mod
 	}
 	
 	public bool hasTag(string tag){
@@ -70,6 +68,7 @@ public class HumanAI : MonoBehaviour, commandable
 			float speed = getSpeed();
 			if(distance < movePrecision || (distance < interactPrecision && interact != null)){
 				// Stop moving
+				mode = commandable.Mode.Normal;
 				rb.drag = activeSlow;
 				hasNavGoal = false;
 				if(interact != null){
@@ -94,6 +93,7 @@ public class HumanAI : MonoBehaviour, commandable
 		deselected(); // We begin deselected
 		isDeactive = false;
 		MouseManager.track(this);
+		mode = commandable.Mode.Normal;
 	}
 	
 	public void OnSit(Seat seat){
@@ -104,6 +104,7 @@ public class HumanAI : MonoBehaviour, commandable
 		// Collider
 		Collider2D[] colliders = GetComponents<Collider2D>();
 		foreach (Collider2D col in colliders) {col.enabled = false;}
+		mode = commandable.Mode.Normal;
 	}
 	
 	public void OnDesit(Seat seat){
@@ -113,5 +114,6 @@ public class HumanAI : MonoBehaviour, commandable
 		// Re-enable colliders
 		Collider2D[] colliders = GetComponents<Collider2D>();
 		foreach (Collider2D col in colliders) {col.enabled = true;}
+		mode = commandable.Mode.Normal;
 	}
 }

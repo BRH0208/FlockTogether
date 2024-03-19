@@ -8,7 +8,7 @@ public class Seat : MonoBehaviour
 	private RaycastHit2D[] results;
 	public GameObject occupant;
 	public Door exitDoor;
-	
+	public List<GameObject> messageList; // When we sit or unsit we inform this source with a send message
 	public void Start(){
 		results = new RaycastHit2D[1];
 	}
@@ -26,9 +26,15 @@ public class Seat : MonoBehaviour
 		
 		// Set occupant
 		occupant = person;
+		
 		// We call the "OnSit" method to indicate that the player is now sitting
 		person.BroadcastMessage("OnSit",this,SendMessageOptions.DontRequireReceiver);
 		person.transform.parent = transform; // We are the parent now!
+		
+		// Propogate signal
+		foreach (GameObject obj in messageList){
+			obj.SendMessage("seatUpdate",true,SendMessageOptions.DontRequireReceiver);
+		}
 	}
 	
 	public bool unsit(){
@@ -48,11 +54,19 @@ public class Seat : MonoBehaviour
 		occupant.transform.position = new Vector3(newPos.x,newPos.y,occupant.transform.position.z);
 		occupant.transform.rotation = Quaternion.Euler(new Vector3(personRotation.x,personRotation.y,doorRotation.z));
 		
+		// Batman them
+		occupant.transform.parent = null;
+		
 		// We call the "OnDesit" method to indicate that the player is now sitting
 		occupant.BroadcastMessage("OnDesit",this,SendMessageOptions.DontRequireReceiver);
 		
-		// Batman them
-		occupant.transform.parent = null;
+		// Forget them
+		occupant = null;
+		
+		// Propogate signal
+		foreach (GameObject obj in messageList){
+			obj.SendMessage("seatUpdate",false,SendMessageOptions.DontRequireReceiver);
+		}
 		return true;
 	}
 }

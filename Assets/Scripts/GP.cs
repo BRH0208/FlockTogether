@@ -4,6 +4,7 @@ using UnityEngine;
 
 // This singleton "Global Properties "class can be used to set static states of the world and manage static variables.
 // Because this is an instance, we can modify these values easily in the editor
+// This also includes generic helper functions where a full class would add unwanted complexity 
 // This class is an exeption to normal naming conventions in order to make "GI.i." a short syntax for accessing global variables 
 public class GP : MonoBehaviour
 {
@@ -36,4 +37,13 @@ public class GP : MonoBehaviour
 	
 	// Used in ZombieManager. This is the start of the infection, the base model from which all zombies are derived
 	public GameObject zombiePrefab; 
+	
+	// Used in various, finds the child object called "SelectIcon" and turns off its sprite renderer
+	// Part of the visual effect for selecting an object.
+	public void selectIconEnabled(GameObject obj, bool enable) {
+		GameObject selectObj = obj.transform.Find("SelectIcon").gameObject;
+		if(selectObj == null){return;}
+		Renderer selected = selectObj.GetComponent<SpriteRenderer>();
+		selected.enabled = enable;
+	}
 }
