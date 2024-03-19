@@ -52,7 +52,6 @@ public class FogMesh : MonoBehaviour
 			} else if (degPerVec <= 0){
 				Debug.LogError("Invalid fog cutter. Degrees per vector must be positive");
 			}
-			Debug.Log("new cone "+FogMesh.instance.cones.Count);
 			// Assign variables
 			this.center = origin;
 			this.degPerVec = degPerVec;
