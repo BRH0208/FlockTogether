@@ -31,7 +31,7 @@ public class VehicleManager : MonoBehaviour, preservationSystem
 	
 	public class JsonObject
 	{
-		// Zombies don't store anything besides their position.
+		// Vehicles store color, x,y, rotation and type.
 		public float r; 
 		public float g;
 		public float b;
@@ -72,7 +72,7 @@ public class VehicleManager : MonoBehaviour, preservationSystem
 	// Load the entity. The string that was returned when it was stashed is now returned.
     public void load(string json){
 		JsonObject data = JsonUtility.FromJson<JsonObject>(json);
-		spawnCar(data.x,data.x,data.type,data.rot,new Color(data.r,data.g,data.b));
+		spawnCar(data.x,data.y,data.type,data.rot,new Color(data.r,data.g,data.b));
 	}
 	
 	// The name for this section in the save file. Shorter names prefered for entities with high count.

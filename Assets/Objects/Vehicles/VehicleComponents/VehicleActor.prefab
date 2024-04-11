@@ -230,7 +230,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1efbf57262722d64096d30c3e39bb8f9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dist: 2.5
+  dist: 1.5
   fov: 30
   degPerVec: 5
   doCone: 0
@@ -292,9 +292,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1efbf57262722d64096d30c3e39bb8f9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dist: 1
+  dist: 0.5
   fov: 150
-  degPerVec: 2
+  degPerVec: 10
   doCone: 0
   oldUp: {x: 0, y: 0}
 --- !u!1 &8838097888530599802

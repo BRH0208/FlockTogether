@@ -6,17 +6,19 @@ public class VehicleObscure : MonoBehaviour
 {
 	GameObject grandparent;
     VehicleAI ai;
-	Collider2D col;
+	Collider2D[] colList;
 	void Start()
     {
         grandparent = transform.parent.parent.gameObject;
 		ai = grandparent.GetComponent<VehicleAI>();
-		col = GetComponent<Collider2D>();
+		colList = GetComponents<Collider2D>();
     }
 
     // TODO: This does not need to be checked each frame
     void Update()
     {
-        col.enabled = !ai.commandable;
+		foreach (Collider2D col in colList){
+			col.enabled = !ai.commandable;
+		}
     }
 }

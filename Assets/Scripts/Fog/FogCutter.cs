@@ -8,14 +8,13 @@ public class FogCutter : MonoBehaviour
 	public float fov;
 	public float degPerVec;
 	public FogMesh.FogCutterCone cone;
-	public bool doCone;
+	public bool doCone = false; // Set as fast-default
 	public Vector2 oldUp;
 	
 	// TODO: Optimise by only changing what needs to be changed if it is updated
 	// instead of reamaking a cone each frame
 	
 	void Start(){
-		doCone = true;
 		oldUp = transform.up;
 	}
     // Start is called before the first frame update
@@ -53,4 +52,11 @@ public class FogCutter : MonoBehaviour
 	public void enable(){doCone = true;}
 	
 	public void disable(){doCone = false;}
+	
+	void OnDestroy()
+    {
+		if(cone != null && FogMesh.instance != null){
+			FogMesh.instance.removeCone(cone);
+		}
+    }
 }

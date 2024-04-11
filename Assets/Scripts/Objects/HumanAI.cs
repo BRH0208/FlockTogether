@@ -94,12 +94,16 @@ public class HumanAI : MonoBehaviour, commandable
 		isDeactive = false;
 		MouseManager.track(this);
 		mode = commandable.Mode.Normal;
+		
+		BroadcastMessage("enable",null,SendMessageOptions.DontRequireReceiver); // Wake ourselves up
 	}
 	
 	public void OnSit(Seat seat){
 		deselected(); // We deselect ourselves.
 		MouseManager.untrack(this); // We can no longer be commanded
 		isDeactive = true;
+		
+		BroadcastMessage("disable",null,SendMessageOptions.DontRequireReceiver); 
 		
 		// Collider
 		Collider2D[] colliders = GetComponents<Collider2D>();
@@ -110,6 +114,8 @@ public class HumanAI : MonoBehaviour, commandable
 	public void OnDesit(Seat seat){
 		MouseManager.track(this); // We can no longer be commanded
 		isDeactive = false;
+		
+		BroadcastMessage("enable",null,SendMessageOptions.DontRequireReceiver); 
 		
 		// Re-enable colliders
 		Collider2D[] colliders = GetComponents<Collider2D>();

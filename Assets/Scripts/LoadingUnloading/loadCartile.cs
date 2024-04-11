@@ -52,6 +52,8 @@ public class loadCartile : loadEmpty
 		JsonData data = JsonUtility.FromJson<JsonData>(json);
 		if(!data.didGenerate){
 			generate(data.seed);
+		}else {
+			this.didGenerate = data.didGenerate;
 		}
 	}
 

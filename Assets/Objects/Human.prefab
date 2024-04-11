@@ -332,9 +332,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   activeSlow: 200
   passiveSlow: 50
-  maxSpeed: 2
+  walkSpeed: 1
+  sprintMod: 1.2
   roatationRate: 450
   isDeactive: 0
+  mode: 0
   movePrecision: 0.01
   interactPrecision: 0.015
 --- !u!50 &2519843387365993685
@@ -420,11 +422,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1efbf57262722d64096d30c3e39bb8f9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  fogScript: {fileID: 0}
-  dist: 2
+  dist: 0.5
   fov: 180
-  degPerVec: 5
+  degPerVec: 10
   doCone: 0
+  oldUp: {x: 0, y: 0}
 --- !u!1 &7855792404287555138
 GameObject:
   m_ObjectHideFlags: 0
