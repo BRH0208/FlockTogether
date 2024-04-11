@@ -95,7 +95,7 @@ public class worldLoader : MonoBehaviour
 	// The null is so we only construct it once 
 	
 	public static loadtile getLoader(Vector3Int pos){
-		loadtile loader = new loadZombietile(); // TODO: Replace this
+		loadtile loader = new loadCartile(); // TODO: Replace this
 		loader.init((Vector2Int) pos); 
 		return loader;
 	}

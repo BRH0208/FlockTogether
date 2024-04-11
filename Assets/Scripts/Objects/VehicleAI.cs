@@ -7,7 +7,9 @@ public class VehicleAI : MonoBehaviour, preservable
 	public Seat driverSeat;
 	public Seat[] seats; 
 	private VehicleActor[] actors;
-	float dumpTime = 0.0f;
+	public Color savedColor;
+	public int type;
+	private float dumpTime = 0.0f;
 	private bool _commandable; // Cashed state
 	public bool commandable{
 		get{return _commandable;}
@@ -35,8 +37,7 @@ public class VehicleAI : MonoBehaviour, preservable
 	}
 	void Start()
     { 
-        randomCarColor(); // Todo: This should be set as part of more advanced creation of a vehicle, not randomly on start.
-		actors = GetComponentsInChildren<VehicleActor>();
+        actors = GetComponentsInChildren<VehicleActor>();
 		seats = GetComponentsInChildren<Seat>();
 		foreach (Seat seat in seats){
 			seat.messageList.Add(gameObject);
@@ -80,17 +81,11 @@ public class VehicleAI : MonoBehaviour, preservable
 		}
 		commandable = false;
 	}
-	// Randomly assigns a color from the car colors
-    public void randomCarColor()
-    {
-		List<Color> carPaint = GP.i.carPaint;
-        recolor(carPaint[Random.Range(0,carPaint.Count)]);
-    }
-	
 	// Paints this vehicle with the chosen color
 	// Updates the sprite color of every gameobject in the "paintedObjects" list
-	private void recolor(Color color)
+	public void recolor(Color color)
 	{
+		savedColor = color;
 		foreach (GameObject obj in paintedObjects){
 			SpriteRenderer renderer = obj.GetComponent<SpriteRenderer>();
 			if(renderer == null){

@@ -98,7 +98,7 @@ public class HumanAI : MonoBehaviour, commandable
 	
 	public void OnSit(Seat seat){
 		deselected(); // We deselect ourselves.
-		MouseManager.commandedObjects.Remove(this); // We can no longer be commanded
+		MouseManager.untrack(this); // We can no longer be commanded
 		isDeactive = true;
 		
 		// Collider

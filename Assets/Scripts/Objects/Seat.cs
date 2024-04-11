@@ -57,7 +57,7 @@ public class Seat : MonoBehaviour
 		// Batman them
 		occupant.transform.parent = null;
 		
-		// We call the "OnDesit" method to indicate that the player is now sitting
+		// We call the "OnDesit" method to indicate that the player is not sitting
 		occupant.BroadcastMessage("OnDesit",this,SendMessageOptions.DontRequireReceiver);
 		
 		// Forget them

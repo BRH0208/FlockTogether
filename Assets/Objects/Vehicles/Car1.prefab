@@ -124,6 +124,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   driverSeat: {fileID: 8091577631413696619}
+  seats: []
+  savedColor: {r: 0, g: 0, b: 0, a: 0}
+  type: 0
   paintedObjects:
   - {fileID: 1687609602933219138}
 --- !u!1001 &951690128673452818
@@ -656,6 +659,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 121728535499608354}
     m_Modifications:
+    - target: {fileID: 187228241999719683, guid: a4b3fdf29b1640c4fbfdfd154a6b148f, type: 3}
+      propertyPath: m_Layer
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 218006093406273191, guid: a4b3fdf29b1640c4fbfdfd154a6b148f, type: 3}
+      propertyPath: m_Layer
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2441150633329754639, guid: a4b3fdf29b1640c4fbfdfd154a6b148f, type: 3}
       propertyPath: m_Name
       value: VehicleActor

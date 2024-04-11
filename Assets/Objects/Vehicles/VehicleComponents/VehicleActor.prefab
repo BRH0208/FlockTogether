@@ -234,6 +234,7 @@ MonoBehaviour:
   fov: 30
   degPerVec: 5
   doCone: 0
+  oldUp: {x: 0, y: 0}
 --- !u!114 &6246362984595756156
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -246,6 +247,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ec2951c43b0608a4ca841328a276c8aa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  parent: {fileID: 0}
 --- !u!1 &3226657778102112031
 GameObject:
   m_ObjectHideFlags: 0
@@ -291,9 +293,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   dist: 1
-  fov: 120
+  fov: 150
   degPerVec: 2
   doCone: 0
+  oldUp: {x: 0, y: 0}
 --- !u!1 &8838097888530599802
 GameObject:
   m_ObjectHideFlags: 0

@@ -5,12 +5,12 @@ using System;
 using Random=UnityEngine.Random;
 // This tile ONLY has zombies. no hitboxes or anything else
 // init and getPos are handled by load empty
-public class loadZombietile : loadEmpty
+public class loadCartile : loadEmpty
 {
-	private const int zombieCount = 10;
+	public const int spawnCount = 2;
 	bool didAwake;
 	bool didGenerate;
-	ZombieManager zmanager;
+	VehicleManager vmanager;
 	[Serializable]
 	public class JsonData
 	{
@@ -34,11 +34,15 @@ public class loadZombietile : loadEmpty
 	// We generate by placing our zombies
 	public override void generate(int seed){
 		if(didGenerate){ return; }
-		zmanager = ZombieManager.instance;
+		vmanager = VehicleManager.instance;
 		didGenerate = true;
 		Random.InitState(seed); // Set a seed.
-		for (int i = 0; i < zombieCount; i++){
-			GameObject zombie = zmanager.spawnZombie(pos.x+Random.value,pos.y+Random.value);
+		for (int i = 0; i < spawnCount; i++){
+			GameObject car = vmanager.spawnCar(
+				pos.x+Random.value,pos.y+Random.value, // pos
+				Random.Range(0,vmanager.carCount), // id
+				Random.value*360.0f, // rotation
+				vmanager.randomCarColor()); // color
 		}
 		base.generate(seed);
 	}

@@ -46,4 +46,7 @@ public class GP : MonoBehaviour
 		Renderer selected = selectObj.GetComponent<SpriteRenderer>();
 		selected.enabled = enable;
 	}
+	
+	// Used in vehicle manger, a list of gameobject prefabs for various cars
+	public GameObject[] cars;
 }
