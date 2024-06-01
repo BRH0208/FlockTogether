@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 59cba0dec7e8e78428a9e5ea4f278dd1
+guid: 25cb8b7518116c443aea9b9f80ff686d
 TextureImporter:
   internalIDToNameTable: []
   externalObjects: {}
@@ -50,7 +50,7 @@ TextureImporter:
   spritePivot: {x: 0.5, y: 0.5}
   spritePixelsToUnits: 64
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
-  spriteGenerateFallbackPhysicsShape: 0
+  spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
   alphaIsTransparency: 1
   spriteTessellationDetail: -1
@@ -123,343 +123,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: ParkingSpritesheet_0
-      rect:
-        serializedVersion: 2
-        x: 0
-        y: 448
-        width: 64
-        height: 64
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 4eccccd4feb6993409ef2311f8e5509c
-      internalID: 335223916
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: ParkingSpritesheet_1
-      rect:
-        serializedVersion: 2
-        x: 64
-        y: 448
-        width: 64
-        height: 64
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 16618e6fe3ed7fa4b966c23908b8dfb5
-      internalID: -508267588
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: ParkingSpritesheet_2
-      rect:
-        serializedVersion: 2
-        x: 128
-        y: 448
-        width: 64
-        height: 64
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: d0a4cfa1a687f5c45af6e1fb79f1e01d
-      internalID: 267570427
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: ParkingSpritesheet_3
-      rect:
-        serializedVersion: 2
-        x: 192
-        y: 448
-        width: 64
-        height: 64
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: a394952898ed42146a5799917b7f2942
-      internalID: -2055687347
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: ParkingSpritesheet_4
-      rect:
-        serializedVersion: 2
-        x: 256
-        y: 448
-        width: 64
-        height: 64
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 24028b7939614064c899685e53cd29e4
-      internalID: 1118701675
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: ParkingSpritesheet_5
-      rect:
-        serializedVersion: 2
-        x: 320
-        y: 448
-        width: 64
-        height: 64
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 78c00e56e2ab10241afa3db131fc16e7
-      internalID: 1246652186
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: ParkingSpritesheet_6
-      rect:
-        serializedVersion: 2
-        x: 384
-        y: 448
-        width: 64
-        height: 64
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 77a7d30ec9ad7fe449c898f6909ff435
-      internalID: 609098883
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: ParkingSpritesheet_7
-      rect:
-        serializedVersion: 2
-        x: 448
-        y: 448
-        width: 64
-        height: 64
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: f4ad2d384c60e2e47a7019712f09dc55
-      internalID: -1826285302
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: ParkingSpritesheet_8
-      rect:
-        serializedVersion: 2
-        x: 0
-        y: 384
-        width: 64
-        height: 64
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 04f6b3f39cd252641bbf689095ec35f8
-      internalID: -1087849883
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: ParkingSpritesheet_9
-      rect:
-        serializedVersion: 2
-        x: 64
-        y: 384
-        width: 64
-        height: 64
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: baf75b3f625678f4d9b286ae029b88d2
-      internalID: 580491371
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: ParkingSpritesheet_10
-      rect:
-        serializedVersion: 2
-        x: 128
-        y: 384
-        width: 64
-        height: 64
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: a40d2fb7609fa574889f918449cc997e
-      internalID: 449239617
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: ParkingSpritesheet_11
-      rect:
-        serializedVersion: 2
-        x: 192
-        y: 384
-        width: 64
-        height: 64
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 48d808af77b85df44ba93ce4facb27a3
-      internalID: -595562130
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: ParkingSpritesheet_12
-      rect:
-        serializedVersion: 2
-        x: 256
-        y: 384
-        width: 64
-        height: 64
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 1e25c7126375eff4c94651cb5d65cb30
-      internalID: -426090319
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: ParkingSpritesheet_13
-      rect:
-        serializedVersion: 2
-        x: 320
-        y: 384
-        width: 64
-        height: 64
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 76adbc26d845c0e4ca8338859d41a09a
-      internalID: 1663941786
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: ParkingSpritesheet_14
-      rect:
-        serializedVersion: 2
-        x: 384
-        y: 384
-        width: 64
-        height: 64
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: b6a29dba8cfaa4f4bafc2da0359eb470
-      internalID: -982892423
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: ParkingSpritesheet_15
-      rect:
-        serializedVersion: 2
-        x: 448
-        y: 384
-        width: 64
-        height: 64
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: f09e5f81c54939f4ba5d8bf9a52ee6f0
-      internalID: 490168248
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: ParkingSpritesheet_16
+      name: HouseSpritesheet_l_0
       rect:
         serializedVersion: 2
         x: 0
@@ -473,14 +137,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: f73c4a0682f4400498f60291a78f5b33
-      internalID: 365064804
+      spriteID: 71b422378f0c04442a43526c7f773dc1
+      internalID: 1933226342
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ParkingSpritesheet_17
+      name: HouseSpritesheet_l_1
       rect:
         serializedVersion: 2
         x: 64
@@ -494,14 +158,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 39d2c5ac8a78810479721a373f1894f1
-      internalID: -367505145
+      spriteID: 3b81884306c8e404785b102a1c9b3fc8
+      internalID: 1580648413
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ParkingSpritesheet_18
+      name: HouseSpritesheet_l_2
       rect:
         serializedVersion: 2
         x: 128
@@ -515,14 +179,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 75c2f69885296e44498f76ff61bdbcfb
-      internalID: -1324063055
+      spriteID: 029c18aa135fb07479f37c853ddc29c7
+      internalID: -933398767
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ParkingSpritesheet_19
+      name: HouseSpritesheet_l_3
       rect:
         serializedVersion: 2
         x: 192
@@ -536,14 +200,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 0e1386c68739dd14085c075021370270
-      internalID: -1600689846
+      spriteID: 1a734275b91eff048b25cbb6c30bcd18
+      internalID: -721713294
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ParkingSpritesheet_20
+      name: HouseSpritesheet_l_4
       rect:
         serializedVersion: 2
         x: 256
@@ -557,14 +221,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 7e9876c5ef482da48a5d79a3777626ec
-      internalID: 1010875362
+      spriteID: 383a48c74f6986c4b963160346b2247c
+      internalID: 172185816
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ParkingSpritesheet_21
+      name: HouseSpritesheet_l_5
       rect:
         serializedVersion: 2
         x: 320
@@ -578,14 +242,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 00d5405239c6fee438a7c4c5dd3b9fb5
-      internalID: 566925881
+      spriteID: bf53a500d880f3f4d8ea7df077e6c605
+      internalID: 1230617388
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ParkingSpritesheet_22
+      name: HouseSpritesheet_l_6
       rect:
         serializedVersion: 2
         x: 384
@@ -599,14 +263,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 77c52cf09f9714d4090445f34bfbfa70
-      internalID: 1484349222
+      spriteID: 86272b9529ddd9c4982358b802d0be91
+      internalID: -1309464705
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ParkingSpritesheet_23
+      name: HouseSpritesheet_l_7
       rect:
         serializedVersion: 2
         x: 448
@@ -620,14 +284,77 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: cbe22c91b4658914aa5917b6aa4dfb5a
-      internalID: -821218985
+      spriteID: e9423571cdc74cd478ef43298bdf70a7
+      internalID: -354042455
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ParkingSpritesheet_24
+      name: HouseSpritesheet_l_8
+      rect:
+        serializedVersion: 2
+        x: 512
+        y: 320
+        width: 64
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d2724d810e2d16b40b7835eb6e2ef515
+      internalID: -796922489
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: HouseSpritesheet_l_9
+      rect:
+        serializedVersion: 2
+        x: 576
+        y: 320
+        width: 64
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d8846e1d631bee54aa54de6041e1ae99
+      internalID: 127082097
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: HouseSpritesheet_l_10
+      rect:
+        serializedVersion: 2
+        x: 640
+        y: 320
+        width: 64
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 576c0a6230676e947accbc2938b0cb0e
+      internalID: 992344458
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: HouseSpritesheet_l_11
       rect:
         serializedVersion: 2
         x: 0
@@ -641,14 +368,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: df336cb5d488f0840ab15a3d0a29dc9a
-      internalID: -1607759372
+      spriteID: b40f75ff667502043b0af7e9d2f69696
+      internalID: 1425545155
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ParkingSpritesheet_25
+      name: HouseSpritesheet_l_12
       rect:
         serializedVersion: 2
         x: 64
@@ -662,14 +389,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 60437836e32496344a504a7577eceac0
-      internalID: -143245709
+      spriteID: bb519a924842bf443beb7a5c60101762
+      internalID: 1555991962
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ParkingSpritesheet_26
+      name: HouseSpritesheet_l_13
       rect:
         serializedVersion: 2
         x: 128
@@ -683,14 +410,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 621897e76119a2443b5c764b38e44fb0
-      internalID: -1496846548
+      spriteID: 1a7f4c4e3bf71f645b25702b6c99f19f
+      internalID: 1709120465
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ParkingSpritesheet_27
+      name: HouseSpritesheet_l_14
       rect:
         serializedVersion: 2
         x: 192
@@ -704,14 +431,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 73815b8224659bf4da28e0b6f3ad224d
-      internalID: 1836909639
+      spriteID: e07b695ce0c58b64f835be3ae0ae5199
+      internalID: -1627187867
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ParkingSpritesheet_28
+      name: HouseSpritesheet_l_15
       rect:
         serializedVersion: 2
         x: 256
@@ -725,14 +452,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 730913ff84103bd40a6fbd856950eba4
-      internalID: -1392384691
+      spriteID: 4bfbbb7804f48e74bb46d42b1dfae0e8
+      internalID: 1419135154
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ParkingSpritesheet_29
+      name: HouseSpritesheet_l_16
       rect:
         serializedVersion: 2
         x: 320
@@ -746,14 +473,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 79985a43091cf4549bad6534f65aded2
-      internalID: -1575198495
+      spriteID: 31471eaf93085e143a308fc5c8cab528
+      internalID: -1096811171
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ParkingSpritesheet_30
+      name: HouseSpritesheet_l_17
       rect:
         serializedVersion: 2
         x: 384
@@ -767,14 +494,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: eefa9794c74af224aa592ce690176097
-      internalID: 1451291169
+      spriteID: 30613dc81d6ff5a468a7381ba315779d
+      internalID: -1401689310
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ParkingSpritesheet_31
+      name: HouseSpritesheet_l_18
       rect:
         serializedVersion: 2
         x: 448
@@ -788,14 +515,77 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 3a06216a436f75348a55a309817d7db6
-      internalID: 1579553003
+      spriteID: b8a02dcc7426ad84ca066b19d4818566
+      internalID: -267057671
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ParkingSpritesheet_32
+      name: HouseSpritesheet_l_19
+      rect:
+        serializedVersion: 2
+        x: 512
+        y: 256
+        width: 64
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 05eb61dac8f26f14581c93bfcb66e350
+      internalID: 1281042281
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: HouseSpritesheet_l_20
+      rect:
+        serializedVersion: 2
+        x: 576
+        y: 256
+        width: 64
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 75e6337ef0d38b1499ebbfaa24504cba
+      internalID: 1242005867
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: HouseSpritesheet_l_21
+      rect:
+        serializedVersion: 2
+        x: 640
+        y: 256
+        width: 64
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 17ba97da5cd98684ea65f47f027d5d86
+      internalID: 787580830
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: HouseSpritesheet_l_22
       rect:
         serializedVersion: 2
         x: 0
@@ -809,14 +599,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: b6f85379b428f4e46b70a03a7fc4579e
-      internalID: 1868682637
+      spriteID: f19309d8d91c1c74486ada7fcdbd7c79
+      internalID: -1912194602
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ParkingSpritesheet_33
+      name: HouseSpritesheet_l_23
       rect:
         serializedVersion: 2
         x: 64
@@ -830,14 +620,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 2a145b193bc5e0e42bde9c727318d2f2
-      internalID: 2091476140
+      spriteID: 93a5da388094a2b449fbcb3d6a298ac7
+      internalID: -1388550945
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ParkingSpritesheet_34
+      name: HouseSpritesheet_l_24
       rect:
         serializedVersion: 2
         x: 128
@@ -851,14 +641,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 1f846406a90dc314bb9938109e696abb
-      internalID: -88857815
+      spriteID: 8d78086d12958d04db11026a39685d30
+      internalID: 1310307659
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ParkingSpritesheet_35
+      name: HouseSpritesheet_l_25
       rect:
         serializedVersion: 2
         x: 192
@@ -872,14 +662,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 8a8ae51bd1a5bcf43a47130cb715e57f
-      internalID: 951238769
+      spriteID: a96abcd88fd644745805aec760d0162a
+      internalID: 1679267325
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ParkingSpritesheet_36
+      name: HouseSpritesheet_l_26
       rect:
         serializedVersion: 2
         x: 256
@@ -893,14 +683,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 53100db3995ee0243958e7ef9886b948
-      internalID: 1865607254
+      spriteID: cf216f2de48256e45952b780eea6d1df
+      internalID: -142458451
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ParkingSpritesheet_37
+      name: HouseSpritesheet_l_27
       rect:
         serializedVersion: 2
         x: 320
@@ -914,14 +704,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 443a6c9d4c883eb4382e84080f5d3661
-      internalID: -1899011673
+      spriteID: f28eaf29963f92545bb097dee3038edd
+      internalID: -135607819
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ParkingSpritesheet_38
+      name: HouseSpritesheet_l_28
       rect:
         serializedVersion: 2
         x: 384
@@ -935,14 +725,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 84e1949337505b0448ef1a6a8003150d
-      internalID: 828191447
+      spriteID: 2f8f95702da81bb4db9404d8465ca0b4
+      internalID: -980456027
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ParkingSpritesheet_39
+      name: HouseSpritesheet_l_29
       rect:
         serializedVersion: 2
         x: 448
@@ -956,14 +746,77 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 71b354dbde103a9468b12531a17d0f36
-      internalID: 17351538
+      spriteID: 2ae58b47755b2bc4ab1465f476ec9d12
+      internalID: -155795472
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ParkingSpritesheet_40
+      name: HouseSpritesheet_l_30
+      rect:
+        serializedVersion: 2
+        x: 512
+        y: 192
+        width: 64
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: aebd559ec063e554082e8ef0397d758d
+      internalID: -411229939
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: HouseSpritesheet_l_31
+      rect:
+        serializedVersion: 2
+        x: 576
+        y: 192
+        width: 64
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6f4e2abe3e714cb4685cfafeac345e48
+      internalID: -49578823
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: HouseSpritesheet_l_32
+      rect:
+        serializedVersion: 2
+        x: 640
+        y: 192
+        width: 64
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: fda3a5e50f299944596e5028265cb752
+      internalID: 1710603208
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: HouseSpritesheet_l_33
       rect:
         serializedVersion: 2
         x: 0
@@ -977,14 +830,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 0c7633c96f7040d4887fffb1f166a01a
-      internalID: -243336543
+      spriteID: fb852fdca794c0c4f9717b8e7114aa7e
+      internalID: 746481077
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ParkingSpritesheet_41
+      name: HouseSpritesheet_l_34
       rect:
         serializedVersion: 2
         x: 64
@@ -998,14 +851,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 419449ffa0ba12f4085e2e5e45ee4a52
-      internalID: -111758614
+      spriteID: d91291ca58987574a84a927fb886b4e4
+      internalID: -57837819
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ParkingSpritesheet_42
+      name: HouseSpritesheet_l_35
       rect:
         serializedVersion: 2
         x: 128
@@ -1019,14 +872,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 6369eb250b98d2c42a3e958c928e1efb
-      internalID: -908690131
+      spriteID: 1431af028756fee40a6aa0ae64cd2bbc
+      internalID: -1866691045
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ParkingSpritesheet_43
+      name: HouseSpritesheet_l_36
       rect:
         serializedVersion: 2
         x: 192
@@ -1040,14 +893,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: b51e2bbd95855454384da8c40a12a44e
-      internalID: 1397915529
+      spriteID: aef353779defc4546a848b1121a758af
+      internalID: -634976105
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ParkingSpritesheet_44
+      name: HouseSpritesheet_l_37
       rect:
         serializedVersion: 2
         x: 256
@@ -1061,14 +914,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 67e427eade2391c4dbd89e54f1ba7a35
-      internalID: 1644340317
+      spriteID: 8328de1026fcc45469a6e23751d672be
+      internalID: -838259839
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ParkingSpritesheet_45
+      name: HouseSpritesheet_l_38
       rect:
         serializedVersion: 2
         x: 320
@@ -1082,14 +935,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: ea017e6a40a413e4eac908339e75b8c3
-      internalID: -58632739
+      spriteID: 852e9655ccaa579409672140e44f08c5
+      internalID: -1062561686
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ParkingSpritesheet_46
+      name: HouseSpritesheet_l_39
       rect:
         serializedVersion: 2
         x: 384
@@ -1103,14 +956,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: c471d391484ebcc4497c4e8db5beed66
-      internalID: -2017753177
+      spriteID: a88caa9f882b2a647a8ca336e424a45a
+      internalID: 1130525615
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ParkingSpritesheet_47
+      name: HouseSpritesheet_l_40
       rect:
         serializedVersion: 2
         x: 448
@@ -1124,14 +977,77 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 8627c1adc35c02f4b8fa408364bb4b34
-      internalID: 313925989
+      spriteID: 35100483db7ee244d8919d68ed34e89c
+      internalID: -1785422691
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ParkingSpritesheet_48
+      name: HouseSpritesheet_l_41
+      rect:
+        serializedVersion: 2
+        x: 512
+        y: 128
+        width: 64
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2ad49d53a35a3324f80b5cc5420a9049
+      internalID: 1335138023
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: HouseSpritesheet_l_42
+      rect:
+        serializedVersion: 2
+        x: 576
+        y: 128
+        width: 64
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0d4dd5882d1eec648a776bd845c3d87e
+      internalID: -847288034
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: HouseSpritesheet_l_43
+      rect:
+        serializedVersion: 2
+        x: 640
+        y: 128
+        width: 64
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 85ebc470916d2a340ab94ea0264181ba
+      internalID: -817628533
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: HouseSpritesheet_l_44
       rect:
         serializedVersion: 2
         x: 0
@@ -1145,14 +1061,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: af1c066897f27884dbcaded04db3de6e
-      internalID: 1399653918
+      spriteID: 8ac1f9d656b975d4591c0d8fe982fdb3
+      internalID: -913434894
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ParkingSpritesheet_49
+      name: HouseSpritesheet_l_45
       rect:
         serializedVersion: 2
         x: 64
@@ -1166,14 +1082,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 38b6d625c58b092419a5cb68fd949cd6
-      internalID: 92448905
+      spriteID: d48368791598fa1408732e7faa73a0e8
+      internalID: 2112227538
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ParkingSpritesheet_50
+      name: HouseSpritesheet_l_46
       rect:
         serializedVersion: 2
         x: 128
@@ -1187,14 +1103,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 029032a60d54de84b8db6533d0747e80
-      internalID: 231708530
+      spriteID: b357d1eba55d0b54e80c1f8e0f1bb0ab
+      internalID: -560912045
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ParkingSpritesheet_51
+      name: HouseSpritesheet_l_47
       rect:
         serializedVersion: 2
         x: 192
@@ -1208,14 +1124,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 975fd6e856e03264dba501a277d30e94
-      internalID: 107682734
+      spriteID: 4b8e88b58091eb545a5e0c405fbd3899
+      internalID: 1611817904
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ParkingSpritesheet_52
+      name: HouseSpritesheet_l_48
       rect:
         serializedVersion: 2
         x: 256
@@ -1229,14 +1145,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 364616d9219810f4dbf864cb0a890327
-      internalID: 762328604
+      spriteID: 8b32f6209007c4140a83e1c5a12d39a6
+      internalID: 250974595
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ParkingSpritesheet_53
+      name: HouseSpritesheet_l_49
       rect:
         serializedVersion: 2
         x: 320
@@ -1250,14 +1166,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 2ee904126d890da45880c27084c78a3c
-      internalID: -2118786515
+      spriteID: cc6527a6820bdfb4a9a8277847bca7a6
+      internalID: 1112988946
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ParkingSpritesheet_54
+      name: HouseSpritesheet_l_50
       rect:
         serializedVersion: 2
         x: 384
@@ -1271,14 +1187,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 65384ce367d658a44b63f3d1d82e5ac5
-      internalID: 457563649
+      spriteID: 88d5deb2239ec6142b89225f2fbf4c08
+      internalID: -726480942
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ParkingSpritesheet_55
+      name: HouseSpritesheet_l_51
       rect:
         serializedVersion: 2
         x: 448
@@ -1292,14 +1208,77 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 8621838d5e985ca45871b375665ff4d4
-      internalID: -2005873606
+      spriteID: ad980097489b923499e58e9dc881d57a
+      internalID: 292405847
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ParkingSpritesheet_56
+      name: HouseSpritesheet_l_52
+      rect:
+        serializedVersion: 2
+        x: 512
+        y: 64
+        width: 64
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: cdccf6273ade295459fba453d5c4ff25
+      internalID: -625733885
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: HouseSpritesheet_l_53
+      rect:
+        serializedVersion: 2
+        x: 576
+        y: 64
+        width: 64
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: bbbee2b2d4149af4db9cef3cf48d3b68
+      internalID: 926247812
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: HouseSpritesheet_l_54
+      rect:
+        serializedVersion: 2
+        x: 640
+        y: 64
+        width: 64
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f0e6a95e37f28774a9b0bd70eeacbe35
+      internalID: -376846580
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: HouseSpritesheet_l_55
       rect:
         serializedVersion: 2
         x: 0
@@ -1313,14 +1292,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 4bd07551e96b80f4a9472a66fa8f67e2
-      internalID: 1586934119
+      spriteID: f3d667284c9b4b74d963dfad32c6b8ab
+      internalID: -1380136131
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ParkingSpritesheet_57
+      name: HouseSpritesheet_l_56
       rect:
         serializedVersion: 2
         x: 64
@@ -1334,14 +1313,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 2caa1f0490bb20d4198baa9aea090a22
-      internalID: 484479424
+      spriteID: e4e10396cd46a75439ac31a61d0c9379
+      internalID: 1905809324
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ParkingSpritesheet_58
+      name: HouseSpritesheet_l_57
       rect:
         serializedVersion: 2
         x: 128
@@ -1355,14 +1334,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: de65323bf6c96144ab9600097642c138
-      internalID: -1220852893
+      spriteID: 8c7f0e20c03e2344081d014a9cb11cd5
+      internalID: -1603749491
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ParkingSpritesheet_59
+      name: HouseSpritesheet_l_58
       rect:
         serializedVersion: 2
         x: 192
@@ -1376,14 +1355,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 87a5f71ac80074740ba70f359e00c818
-      internalID: 1195659085
+      spriteID: 8ab5bb3e0518a894387b36d8d73d0470
+      internalID: 1120314050
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ParkingSpritesheet_60
+      name: HouseSpritesheet_l_59
       rect:
         serializedVersion: 2
         x: 256
@@ -1397,14 +1376,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 2c391a85da98c774d9fe5de8518496fe
-      internalID: -342975733
+      spriteID: 13f07bb12034ff44382f8f9ff1a57a5e
+      internalID: 372643887
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ParkingSpritesheet_61
+      name: HouseSpritesheet_l_60
       rect:
         serializedVersion: 2
         x: 320
@@ -1418,14 +1397,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 3e5af1bfd8f306c468de466af5f9a9a3
-      internalID: 1362786027
+      spriteID: 35ac39e3cc0935b4eb3d45dc5e79d48a
+      internalID: -2100816024
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ParkingSpritesheet_62
+      name: HouseSpritesheet_l_61
       rect:
         serializedVersion: 2
         x: 384
@@ -1439,14 +1418,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: b3f07adb932064548865fcdb462e91db
-      internalID: 237198634
+      spriteID: 36d6021c774afe640b0d24afdfc00995
+      internalID: 530496637
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ParkingSpritesheet_63
+      name: HouseSpritesheet_l_62
       rect:
         serializedVersion: 2
         x: 448
@@ -1460,8 +1439,71 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 2cdab0c88e141b445828d263cad8e8bc
-      internalID: 1146676207
+      spriteID: 1202bbfe551b67f4d93a1e72d5bc4b9a
+      internalID: 1963700764
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: HouseSpritesheet_l_63
+      rect:
+        serializedVersion: 2
+        x: 512
+        y: 0
+        width: 64
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c720ebeeb65146f4faee13916835b75e
+      internalID: 190789186
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: HouseSpritesheet_l_64
+      rect:
+        serializedVersion: 2
+        x: 576
+        y: 0
+        width: 64
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 93de0dedd1074474eb78453fb4a18d4e
+      internalID: -488256731
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: HouseSpritesheet_l_65
+      rect:
+        serializedVersion: 2
+        x: 640
+        y: 0
+        width: 64
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f2faf9d1e03e8ec46abf1da046e400c5
+      internalID: 216533639
       vertices: []
       indices: 
       edges: []
@@ -1477,70 +1519,72 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     nameFileIdTable:
-      ParkingSpritesheet_0: 335223916
-      ParkingSpritesheet_1: -508267588
-      ParkingSpritesheet_10: 449239617
-      ParkingSpritesheet_11: -595562130
-      ParkingSpritesheet_12: -426090319
-      ParkingSpritesheet_13: 1663941786
-      ParkingSpritesheet_14: -982892423
-      ParkingSpritesheet_15: 490168248
-      ParkingSpritesheet_16: 365064804
-      ParkingSpritesheet_17: -367505145
-      ParkingSpritesheet_18: -1324063055
-      ParkingSpritesheet_19: -1600689846
-      ParkingSpritesheet_2: 267570427
-      ParkingSpritesheet_20: 1010875362
-      ParkingSpritesheet_21: 566925881
-      ParkingSpritesheet_22: 1484349222
-      ParkingSpritesheet_23: -821218985
-      ParkingSpritesheet_24: -1607759372
-      ParkingSpritesheet_25: -143245709
-      ParkingSpritesheet_26: -1496846548
-      ParkingSpritesheet_27: 1836909639
-      ParkingSpritesheet_28: -1392384691
-      ParkingSpritesheet_29: -1575198495
-      ParkingSpritesheet_3: -2055687347
-      ParkingSpritesheet_30: 1451291169
-      ParkingSpritesheet_31: 1579553003
-      ParkingSpritesheet_32: 1868682637
-      ParkingSpritesheet_33: 2091476140
-      ParkingSpritesheet_34: -88857815
-      ParkingSpritesheet_35: 951238769
-      ParkingSpritesheet_36: 1865607254
-      ParkingSpritesheet_37: -1899011673
-      ParkingSpritesheet_38: 828191447
-      ParkingSpritesheet_39: 17351538
-      ParkingSpritesheet_4: 1118701675
-      ParkingSpritesheet_40: -243336543
-      ParkingSpritesheet_41: -111758614
-      ParkingSpritesheet_42: -908690131
-      ParkingSpritesheet_43: 1397915529
-      ParkingSpritesheet_44: 1644340317
-      ParkingSpritesheet_45: -58632739
-      ParkingSpritesheet_46: -2017753177
-      ParkingSpritesheet_47: 313925989
-      ParkingSpritesheet_48: 1399653918
-      ParkingSpritesheet_49: 92448905
-      ParkingSpritesheet_5: 1246652186
-      ParkingSpritesheet_50: 231708530
-      ParkingSpritesheet_51: 107682734
-      ParkingSpritesheet_52: 762328604
-      ParkingSpritesheet_53: -2118786515
-      ParkingSpritesheet_54: 457563649
-      ParkingSpritesheet_55: -2005873606
-      ParkingSpritesheet_56: 1586934119
-      ParkingSpritesheet_57: 484479424
-      ParkingSpritesheet_58: -1220852893
-      ParkingSpritesheet_59: 1195659085
-      ParkingSpritesheet_6: 609098883
-      ParkingSpritesheet_60: -342975733
-      ParkingSpritesheet_61: 1362786027
-      ParkingSpritesheet_62: 237198634
-      ParkingSpritesheet_63: 1146676207
-      ParkingSpritesheet_7: -1826285302
-      ParkingSpritesheet_8: -1087849883
-      ParkingSpritesheet_9: 580491371
+      HouseSpritesheet_l_0: 1933226342
+      HouseSpritesheet_l_1: 1580648413
+      HouseSpritesheet_l_10: 992344458
+      HouseSpritesheet_l_11: 1425545155
+      HouseSpritesheet_l_12: 1555991962
+      HouseSpritesheet_l_13: 1709120465
+      HouseSpritesheet_l_14: -1627187867
+      HouseSpritesheet_l_15: 1419135154
+      HouseSpritesheet_l_16: -1096811171
+      HouseSpritesheet_l_17: -1401689310
+      HouseSpritesheet_l_18: -267057671
+      HouseSpritesheet_l_19: 1281042281
+      HouseSpritesheet_l_2: -933398767
+      HouseSpritesheet_l_20: 1242005867
+      HouseSpritesheet_l_21: 787580830
+      HouseSpritesheet_l_22: -1912194602
+      HouseSpritesheet_l_23: -1388550945
+      HouseSpritesheet_l_24: 1310307659
+      HouseSpritesheet_l_25: 1679267325
+      HouseSpritesheet_l_26: -142458451
+      HouseSpritesheet_l_27: -135607819
+      HouseSpritesheet_l_28: -980456027
+      HouseSpritesheet_l_29: -155795472
+      HouseSpritesheet_l_3: -721713294
+      HouseSpritesheet_l_30: -411229939
+      HouseSpritesheet_l_31: -49578823
+      HouseSpritesheet_l_32: 1710603208
+      HouseSpritesheet_l_33: 746481077
+      HouseSpritesheet_l_34: -57837819
+      HouseSpritesheet_l_35: -1866691045
+      HouseSpritesheet_l_36: -634976105
+      HouseSpritesheet_l_37: -838259839
+      HouseSpritesheet_l_38: -1062561686
+      HouseSpritesheet_l_39: 1130525615
+      HouseSpritesheet_l_4: 172185816
+      HouseSpritesheet_l_40: -1785422691
+      HouseSpritesheet_l_41: 1335138023
+      HouseSpritesheet_l_42: -847288034
+      HouseSpritesheet_l_43: -817628533
+      HouseSpritesheet_l_44: -913434894
+      HouseSpritesheet_l_45: 2112227538
+      HouseSpritesheet_l_46: -560912045
+      HouseSpritesheet_l_47: 1611817904
+      HouseSpritesheet_l_48: 250974595
+      HouseSpritesheet_l_49: 1112988946
+      HouseSpritesheet_l_5: 1230617388
+      HouseSpritesheet_l_50: -726480942
+      HouseSpritesheet_l_51: 292405847
+      HouseSpritesheet_l_52: -625733885
+      HouseSpritesheet_l_53: 926247812
+      HouseSpritesheet_l_54: -376846580
+      HouseSpritesheet_l_55: -1380136131
+      HouseSpritesheet_l_56: 1905809324
+      HouseSpritesheet_l_57: -1603749491
+      HouseSpritesheet_l_58: 1120314050
+      HouseSpritesheet_l_59: 372643887
+      HouseSpritesheet_l_6: -1309464705
+      HouseSpritesheet_l_60: -2100816024
+      HouseSpritesheet_l_61: 530496637
+      HouseSpritesheet_l_62: 1963700764
+      HouseSpritesheet_l_63: 190789186
+      HouseSpritesheet_l_64: -488256731
+      HouseSpritesheet_l_65: 216533639
+      HouseSpritesheet_l_7: -354042455
+      HouseSpritesheet_l_8: -796922489
+      HouseSpritesheet_l_9: 127082097
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

@@ -24,5 +24,5 @@ public abstract class interactable : MonoBehaviour
 	// Is the selected object capable of interacting with this object?
     public abstract bool canInteract(commandable entity);
 	
-	public abstract GameObject obj{get;}
+	public virtual GameObject obj{get{return gameObject;}}
 }

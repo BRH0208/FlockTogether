@@ -20,6 +20,6 @@ public interface commandable
 	// In a command, sprint implies we want to do this action quickly. 
 	// It will have different effects depending on the commandable.
 	void commandEmpty(Vector2 clickedPos, Mode mode); // We got a command without an associated interactable
-	void commandInteractable(interactable interact, Mode mode); // We got a command to interact with interactable
+	void commandInteractable(PlayerInteract interact, Mode mode); // We got a command to interact with interactable
 	GameObject obj{get;}
 }

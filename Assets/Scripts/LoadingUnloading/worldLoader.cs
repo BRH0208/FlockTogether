@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System;
+using System.Reflection; // TODO: I hate reflection
 using System.IO;
 using UnityEngine;
 
@@ -75,7 +76,7 @@ public class worldLoader : MonoBehaviour
 			isNew = false;
 		}
 		public rangeCounter(loadtile script){
-			activateCount = 0;
+			activateCount = 0; // TODO: Make this one line, less visual repetition
 			lightBoundry = 0; // TODO: Rename this to use "count"
 			heavyBoundry = 0;
 			
@@ -92,10 +93,41 @@ public class worldLoader : MonoBehaviour
 	public static List<worldLoader> instances = new List<worldLoader>();
 	private static bool needUpdate;
 	private static Dictionary<(int,int),rangeCounter> managedTiles = new Dictionary<(int,int),rangeCounter>(); 
-	// The null is so we only construct it once 
+	private static loadtile[] loadables = null;
 	
+	// Todo, this fails the state-limiting idea as this info is also stored across _every instance of each loadable_
+	private static Dictionary<string,loadtile> loadableDict = null;
+	// The null is so we only construct it once 
+
+	// TODO: This whole system is dumb. It has the bloat of a more expandable system,
+	// but this case switch has to be manually updated with the identifer values
+	// Bad! Bad! Bad!
 	public static loadtile getLoader(Vector3Int pos){
-		loadtile loader = new loadCartile(); // TODO: Replace this
+		if(loadables == null){
+			// First time setup of dict
+			
+			// Include all loadables in this list
+			loadtile[] all_loadable = {new loadEmpty(), new loadZombietile(), new loadHousetile()};
+			loadables = all_loadable;
+			loadableDict = new Dictionary<string,loadtile>();
+			foreach (loadtile phantom_loader in loadables) {
+				foreach (string sprite_name in phantom_loader.spriteList()){
+					loadableDict[sprite_name] = phantom_loader;
+				}
+			}
+		}
+		loadtile loader = new loadEmpty();
+		
+		// TODO: Get the primary layer a better way(GameObject.Find)
+		Sprite sprite = worldGen.instance.layers[0].GetSprite(pos);
+		if(sprite == null){return loader;} // Null tile(water) dealt with by loadEmpty
+		Debug.Log("sprite.name: "+sprite.name); // TODO: Remove
+		if(loadableDict.ContainsKey(sprite.name)){
+			loadtile desiredLoadable = loadableDict[sprite.name];
+			loader = (loadtile)Activator.CreateInstance(desiredLoadable.GetType());
+			Debug.Log(sprite.name+" loaded with "+loader.GetType());
+		}
+		
 		loader.init((Vector2Int) pos); 
 		return loader;
 	}

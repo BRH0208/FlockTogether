@@ -8,7 +8,7 @@ public class HumanAI : MonoBehaviour, commandable
     private Vector2 navGoal;
 	private bool hasNavGoal;
 	
-	private interactable interact;
+	private PlayerInteract interact;
 	
 	public float activeSlow = 10.0f;
 	public float passiveSlow = 1.0f;
@@ -18,8 +18,7 @@ public class HumanAI : MonoBehaviour, commandable
 	public float roatationRate = 0.1f;
 	public bool isDeactive;
 	public commandable.Mode mode;
-	public float movePrecision = 0.01f;
-	public float interactPrecision = 0.015f;
+	public float movePrecision = 0.04f;
 	public GameObject obj{get{return gameObject;}}
 	
 	// This human was selected by a player
@@ -34,8 +33,8 @@ public class HumanAI : MonoBehaviour, commandable
 		GP.i.selectIconEnabled(gameObject, false);
 	}
 	
-	public void commandInteractable(interactable interact,commandable.Mode mode){
-		commandEmpty(interact.obj.transform.position,mode); // We first move to it
+	public void commandInteractable(PlayerInteract interact,commandable.Mode mode){
+		commandEmpty(interact.gameObject.transform.position,mode); // We first move to it
 		this.interact = interact; // We set this as our interact
 	}
 	
@@ -56,6 +55,7 @@ public class HumanAI : MonoBehaviour, commandable
 	
 	public bool hasTag(string tag){
 		if(tag == "sit") {return true;} // Humans can be commanded to sit in a chair
+		if(tag == "hands") {return true;} // Humans can be commanded to sit in a chair
 		return false;
 	}
 	
@@ -65,14 +65,21 @@ public class HumanAI : MonoBehaviour, commandable
 			
 			Vector2 relativePos = (navGoal - (Vector2) transform.position);
 			float distance = relativePos.magnitude;
+			if(interact != null){
+				Collider col = interact.gameObject.GetComponent<Collider>();
+				if(col != null){
+					Vector2 closestPoint = (Vector2) col.ClosestPoint(transform.position);
+					distance = (closestPoint - (Vector2) transform.position).magnitude;
+				}
+			}
 			float speed = getSpeed();
-			if(distance < movePrecision || (distance < interactPrecision && interact != null)){
+			if(distance < movePrecision){
 				// Stop moving
 				mode = commandable.Mode.Normal;
 				rb.drag = activeSlow;
 				hasNavGoal = false;
 				if(interact != null){
-					interact.interact(this); // Do the interaction
+					interact.inter.interact(this); // Do the interaction
 					interact = null;
 				}
 			}else{

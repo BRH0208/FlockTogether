@@ -46,21 +46,7 @@ public class ZombieAI : MonoBehaviour
 		calcFervorFrame = false; 
 	}
 	
-	private uint wang_hash(float time)
-	{
-		unsafe {
-			float* timePtr = &time;
-			uint* timeIntPtr = (uint*) (timePtr); // I am sorry. 
-			uint seed = *timeIntPtr;
-			seed = (seed ^ 61) ^ (seed >> 16);
-			seed *= 9;
-			seed = seed ^ (seed >> 4);
-			seed *= 0x27d4eb2d;
-			seed = seed ^ (seed >> 15);
-			return seed;
-		}
-	}
-	
+
 	// Wake this zombie, so it starts doing things
 	public void wake(){
 		awake = true;
@@ -186,7 +172,7 @@ public class ZombieAI : MonoBehaviour
 				}
 				return;
 			}
-			float frameSeed = wang_hash(Time.time)/(200.0f*Mathf.PI);
+			float frameSeed = GP.i.wang_hash(Time.time)/(200.0f*Mathf.PI);
 			float personalSeed = frameSeed + zombieSeed; // Note: This is an angle
 			float xSpeed = Mathf.Cos(personalSeed);
 			float ySpeed = Mathf.Sin(personalSeed);

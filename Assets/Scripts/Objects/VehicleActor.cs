@@ -38,9 +38,9 @@ public class VehicleActor : MonoBehaviour, commandable
 		parent.dumpPassengers();// todo temp
 	}
 	
-	public void commandInteractable(interactable interact, commandable.Mode mode){ 
+	public void commandInteractable(PlayerInteract interact, commandable.Mode mode){ 
 		// We don't understand how to interact, so we just move to the position
-		commandEmpty((Vector2) interact.obj.transform.position,mode);
+		commandEmpty((Vector2) interact.gameObject.transform.position,mode);
 	} 
 	
 	public GameObject obj{get {return gameObject;}}

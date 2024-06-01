@@ -40,6 +40,4 @@ public class Door : interactable
     public override bool canInteract(commandable entity){
 		return entity.hasTag("sit") && haveSeat();
 	}
-	
-	public override GameObject obj{get{return gameObject;}}
 }

@@ -49,4 +49,24 @@ public class GP : MonoBehaviour
 	
 	// Used in vehicle manger, a list of gameobject prefabs for various cars
 	public GameObject[] cars;
+	
+	// Hashing Algorithm, okay for very cheap random numbers
+	public uint wang_hash(float time)
+	{
+		unsafe {
+			float* timePtr = &time;
+			uint* timeIntPtr = (uint*) (timePtr); // I am sorry. 
+			uint seed = *timeIntPtr;
+			seed = (seed ^ 61) ^ (seed >> 16);
+			seed *= 9;
+			seed = seed ^ (seed >> 4);
+			seed *= 0x27d4eb2d;
+			seed = seed ^ (seed >> 15);
+			return seed;
+		}
+	}
+	
+	// Used in housetile.cs
+	// Should be .json
+	public TextAsset housefile;
 }

@@ -9,10 +9,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f10b8f033893dc340b62c6b8c57f5706, type: 3}
-  m_Name: LargeHometile
+  m_Script: {fileID: 11500000, guid: 387aba8187ff5be40a39c56525867872, type: 3}
+  m_Name: HouseBInside
   m_EditorClassIdentifier: 
-  m_Sprite: {fileID: -730936148, guid: b6b9eb242e7161b44827568106b3fa5d, type: 3}
+  m_Sprite: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Transform:
     e00: 1
@@ -34,7 +34,8 @@ MonoBehaviour:
   m_InstancedGameObject: {fileID: 0}
   m_Flags: 1
   m_ColliderType: 1
-  homeSprites:
+  offsetcolor: {r: 0.34901962, g: 0.33333334, b: 0.3529412, a: 1}
+  baseTiles:
   - {fileID: 1933226342, guid: 25cb8b7518116c443aea9b9f80ff686d, type: 3}
   - {fileID: 1580648413, guid: 25cb8b7518116c443aea9b9f80ff686d, type: 3}
   - {fileID: -933398767, guid: 25cb8b7518116c443aea9b9f80ff686d, type: 3}
@@ -101,5 +102,16 @@ MonoBehaviour:
   - {fileID: 190789186, guid: 25cb8b7518116c443aea9b9f80ff686d, type: 3}
   - {fileID: -488256731, guid: 25cb8b7518116c443aea9b9f80ff686d, type: 3}
   - {fileID: 216533639, guid: 25cb8b7518116c443aea9b9f80ff686d, type: 3}
-  roadTile: {fileID: 11400000, guid: d12a81b48a96eee45a4dd1ec2931869f, type: 2}
-  grassSprite: {fileID: 1751886399, guid: a2ed5ba4885168b4596c3fdc929da05a, type: 3}
+  replacingTiles:
+  - {fileID: 1460446514, guid: 403eb14aad795f24e87074d8d21929f2, type: 3}
+  - {fileID: -1803109309, guid: 403eb14aad795f24e87074d8d21929f2, type: 3}
+  - {fileID: -263053247, guid: 403eb14aad795f24e87074d8d21929f2, type: 3}
+  - {fileID: 1766963377, guid: 403eb14aad795f24e87074d8d21929f2, type: 3}
+  - {fileID: 1920251208, guid: 403eb14aad795f24e87074d8d21929f2, type: 3}
+  - {fileID: 1313021633, guid: 403eb14aad795f24e87074d8d21929f2, type: 3}
+  - {fileID: 1051373421, guid: 403eb14aad795f24e87074d8d21929f2, type: 3}
+  - {fileID: -1623968691, guid: 403eb14aad795f24e87074d8d21929f2, type: 3}
+  - {fileID: 1292993044, guid: 403eb14aad795f24e87074d8d21929f2, type: 3}
+  - {fileID: 1478701412, guid: 403eb14aad795f24e87074d8d21929f2, type: 3}
+  - {fileID: 1048022582, guid: 403eb14aad795f24e87074d8d21929f2, type: 3}
+  baseLayerName: LandLayer

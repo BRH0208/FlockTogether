@@ -24,11 +24,13 @@ public class worldGen : MonoBehaviour
 	public GameObject eventSystem;
 	public GameObject oceanObj;
 	 
+	 // TODO: make private, replace references like this with GameObject.Find() by name;
 	public TileBase roadTile;
 	public TileBase landTile;
 	public TileBase suburbTile;
 	public TileBase parkingTile;
 	public List<TileBase> houseTiles;
+	public List<TileBase> houseTiles_i;
 	
 	public TileBase[] overlayTiles;
 	
@@ -45,6 +47,7 @@ public class worldGen : MonoBehaviour
 	public int seed; 
 	
 	/*
+	TODO: remove this, it is not accurate
 		We keep track of the current span of layers. 
 		0 is always the default "land" layer. 
 		1 is the first story(roads, entrances etc)
@@ -52,7 +55,7 @@ public class worldGen : MonoBehaviour
 		-1 would be one story underground
 		-2 would be two stories underground
 	*/ 
-	Dictionary<int,Tilemap> layers;
+	public Dictionary<int,Tilemap> layers;
 	
 	// Regions
 	public int[,] ownership; // Who owns which tile
@@ -189,9 +192,9 @@ public class worldGen : MonoBehaviour
 	
 	private HashSet<Vector2Int> roadPositions;
 	
-	// Always the 0th element in the layers dictionary. Most things are placed here
 	private Tilemap primaryLayer;
 	private Tilemap overdrawLayer;
+	private Tilemap interiorLayer;
 	
 	private int minHeight = 0;
 	private int maxHeight = 0;
@@ -290,6 +293,7 @@ public class worldGen : MonoBehaviour
         // We give this layer a special name because we use it so much
 		primaryLayer = GridObj.transform.Find("LandLayer").gameObject.GetComponent<Tilemap>(); // Find it
 		overdrawLayer = GridObj.transform.Find("OverdrawLayer").gameObject.GetComponent<Tilemap>();
+		interiorLayer = GridObj.transform.Find("InteriorLayer").gameObject.GetComponent<Tilemap>();
 		
 		layers.Add(0,primaryLayer); // Store the tilemap(as reference)
 		
@@ -579,7 +583,7 @@ public class worldGen : MonoBehaviour
 			
 			// Place the tile
 			posVec3 = new Vector3Int(pos.x,pos.y,0);
-			primaryLayer.SetTile(posVec3,roadTile);
+			primaryLayer.SetTile(posVec3,roadTile); // TODO: Batch tile placement
 			roadCount++;
 			
 			// add the next tiles
@@ -605,10 +609,10 @@ public class worldGen : MonoBehaviour
 			}
 			
 		}
+		
+		
 		roadPositions = regularExpansion; // We save the road positions for later
-		
 		Debug.Log(roadCount + "/" + desiredRoads + " roads");
-		
 	}
 	
 	// Divide the map into navicable blocks
@@ -665,7 +669,7 @@ public class worldGen : MonoBehaviour
 		foreach (Vector2Int pos in roadPositions) {
 			roadsEvaluated++;
 			if (roadsEvaluated == roadPositions.Count / 2){
-				stageProgress = 0.75f; // We are halfway complete with the second part of region filling, so 75%
+				stageProgress = 0.70f; // We are halfway complete with the second part of region filling, so 75%
 				yield return null;
 			}
 			posVec3 = new Vector3Int(pos.x,pos.y,0);
@@ -782,6 +786,30 @@ public class worldGen : MonoBehaviour
 			regionData.Add(currentIndex,new WorldgenRegion(currentIndex));
 		}
 		
+		stageProgress = 0.90f; // We are halfway complete with the second part of region filling, so 75%
+		yield return null;
+		// Remove nonsense roads
+		foreach (Vector2Int pos in new HashSet<Vector2Int>(roadPositions)) {
+			Vector2Int dir = Vector2Int.up;
+			bool doRemove = true; 
+			for (int dirCount = 0; dirCount < 4; dirCount++){
+				dir = rotateVector2Int(dir);
+				if(primaryLayer.GetTile(new Vector3Int(pos.x + dir.x,pos.y + dir.y, 0)) == roadTile){
+					int checkIndex = ownership[pos.x,pos.y];
+					if (checkIndex > 0 && ownership[pos.x + dir.x*2,pos.y + dir.y*2] == checkIndex){
+						primaryLayer.SetTile(new Vector3Int(pos.x + dir.x,pos.y + dir.y, 0),landTile); // Delete the invalid tile
+						ownership[pos.x + dir.x,pos.y + dir.y] = checkIndex; // Change ownership of now empty tile
+						regionData[checkIndex].size = regionData[checkIndex].size + 1; // Count that added tile
+					}else {
+						doRemove = false;
+					}
+				}
+			}
+			if(doRemove){
+				roadPositions.Remove(pos);
+			}
+		}
+
 		Debug.Log(currentIndex + " regions created");
 	}
 	
@@ -876,7 +904,6 @@ public class worldGen : MonoBehaviour
 			if (region.origin == new Vector2Int(-1,-1)){
 				continue;
 			}
-			// TODO: Remove roads that are pointless IE it divides a region such that either side has the same ownership. 
 			// TODO: Make a system for regions to "fight" for priority to place
 			
 			// Attempt generation
@@ -1028,10 +1055,12 @@ public class worldGen : MonoBehaviour
 						if (Random.Range(0,2) == 0){
 							// Small House
 							primaryLayer.SetTile((Vector3Int) (roadPos + checkDir), houseTiles[0]);
+							interiorLayer.SetTile((Vector3Int) (roadPos + checkDir), houseTiles_i[0]);
 							populationEstimate += 2;
 						} else {
 							// Big House
 							primaryLayer.SetTile((Vector3Int) (roadPos + checkDir), houseTiles[1]);
+							interiorLayer.SetTile((Vector3Int) (roadPos + checkDir), houseTiles_i[1]);
 							populationEstimate += 3;// The average is 2.5 per home so this works out
 						}
 					}

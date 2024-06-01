@@ -153,9 +153,9 @@ public class FogMesh : MonoBehaviour
 				Vector2 rayHit;
 				int hits = Physics2D.Raycast(cone.center,ray,fogBlocker,rayBuffer,cone.range);
 				if(hits == 0){
-					rayHit = cone.center + ray * cone.range;
+					rayHit = cone.center + ray * (cone.range + 0.015625f);
 				} else {
-					rayHit = cone.center + ray * rayBuffer[0].distance; // We only take the position of the first thing we hit. 
+					rayHit = cone.center + ray * (rayBuffer[0].distance + 0.015625f); // We only take the position of the first thing we hit. 
 				}
 				vertices[vertexIndex] = rayHit;
 				if(rayNum > 0){ // Fenceposting prevention

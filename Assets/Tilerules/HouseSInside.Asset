@@ -9,10 +9,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f10b8f033893dc340b62c6b8c57f5706, type: 3}
-  m_Name: SmallHometile
+  m_Script: {fileID: 11500000, guid: 387aba8187ff5be40a39c56525867872, type: 3}
+  m_Name: HouseSInside
   m_EditorClassIdentifier: 
-  m_Sprite: {fileID: -1056810111, guid: b6b9eb242e7161b44827568106b3fa5d, type: 3}
+  m_Sprite: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Transform:
     e00: 1
@@ -34,7 +34,8 @@ MonoBehaviour:
   m_InstancedGameObject: {fileID: 0}
   m_Flags: 1
   m_ColliderType: 1
-  homeSprites:
+  offsetcolor: {r: 0.34901962, g: 0.33333334, b: 0.3529412, a: 1}
+  baseTiles:
   - {fileID: 1547815280, guid: f0b5c7f57d3046d49a537fc3f7ca88d3, type: 3}
   - {fileID: 1972108624, guid: f0b5c7f57d3046d49a537fc3f7ca88d3, type: 3}
   - {fileID: 2140640775, guid: f0b5c7f57d3046d49a537fc3f7ca88d3, type: 3}
@@ -155,5 +156,25 @@ MonoBehaviour:
   - {fileID: -1909089862, guid: f0b5c7f57d3046d49a537fc3f7ca88d3, type: 3}
   - {fileID: -1957955547, guid: f0b5c7f57d3046d49a537fc3f7ca88d3, type: 3}
   - {fileID: 1434339850, guid: f0b5c7f57d3046d49a537fc3f7ca88d3, type: 3}
-  roadTile: {fileID: 11400000, guid: d12a81b48a96eee45a4dd1ec2931869f, type: 2}
-  grassSprite: {fileID: 1751886399, guid: a2ed5ba4885168b4596c3fdc929da05a, type: 3}
+  replacingTiles:
+  - {fileID: 1426493769, guid: e1ba378d8ed78b340906ab5c4a51a929, type: 3}
+  - {fileID: 1338576600, guid: e1ba378d8ed78b340906ab5c4a51a929, type: 3}
+  - {fileID: 1609773130, guid: e1ba378d8ed78b340906ab5c4a51a929, type: 3}
+  - {fileID: 308375261, guid: e1ba378d8ed78b340906ab5c4a51a929, type: 3}
+  - {fileID: -2014513254, guid: e1ba378d8ed78b340906ab5c4a51a929, type: 3}
+  - {fileID: -1696993766, guid: e1ba378d8ed78b340906ab5c4a51a929, type: 3}
+  - {fileID: -1436651081, guid: e1ba378d8ed78b340906ab5c4a51a929, type: 3}
+  - {fileID: -793203520, guid: e1ba378d8ed78b340906ab5c4a51a929, type: 3}
+  - {fileID: 785936411, guid: e1ba378d8ed78b340906ab5c4a51a929, type: 3}
+  - {fileID: 1532136091, guid: e1ba378d8ed78b340906ab5c4a51a929, type: 3}
+  - {fileID: 1125363243, guid: e1ba378d8ed78b340906ab5c4a51a929, type: 3}
+  - {fileID: 701207844, guid: e1ba378d8ed78b340906ab5c4a51a929, type: 3}
+  - {fileID: -858799469, guid: e1ba378d8ed78b340906ab5c4a51a929, type: 3}
+  - {fileID: 538600042, guid: e1ba378d8ed78b340906ab5c4a51a929, type: 3}
+  - {fileID: -2132590949, guid: e1ba378d8ed78b340906ab5c4a51a929, type: 3}
+  - {fileID: -1717821206, guid: e1ba378d8ed78b340906ab5c4a51a929, type: 3}
+  - {fileID: -121175220, guid: e1ba378d8ed78b340906ab5c4a51a929, type: 3}
+  - {fileID: -1193657242, guid: e1ba378d8ed78b340906ab5c4a51a929, type: 3}
+  - {fileID: -2041115071, guid: e1ba378d8ed78b340906ab5c4a51a929, type: 3}
+  - {fileID: 1958189638, guid: e1ba378d8ed78b340906ab5c4a51a929, type: 3}
+  baseLayerName: LandLayer

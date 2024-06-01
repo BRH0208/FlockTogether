@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 using Random=UnityEngine.Random;
-// This tile ONLY has zombies. no hitboxes or anything else
+// This tile ONLY has cars. no hitboxes or anything else
 // init and getPos are handled by load empty
+// Intended for debug use //TODO: Remove as use changes
 public class loadCartile : loadEmpty
 {
 	public const int spawnCount = 2;
@@ -17,6 +18,7 @@ public class loadCartile : loadEmpty
 	  public int seed;
 	  public bool didGenerate;
 	}
+	
 	
 	public override void init(Vector2Int pos) {
 		didAwake = false;

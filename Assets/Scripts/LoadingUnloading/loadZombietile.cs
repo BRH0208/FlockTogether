@@ -18,6 +18,12 @@ public class loadZombietile : loadEmpty
 	  public bool didGenerate;
 	}
 	
+	// We generate on blank grass tiles, but not beach tiles
+	public override string[] spriteList(){
+		string[] arr = {"IslandTileset_2"};
+		return arr;
+	}
+	
 	public override void init(Vector2Int pos) {
 		didAwake = false;
 		didGenerate = false;

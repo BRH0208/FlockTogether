@@ -118,7 +118,7 @@ public class MouseManager : MonoBehaviour
 				Vector2 clickedPos = (Vector2) cam.ScreenToWorldPoint(mousePosition);
 				selectedObj.commandEmpty(clickedPos,mode);
 			} else {
-				selectedObj.commandInteractable(interact.inter,mode);
+				selectedObj.commandInteractable(interact,mode);
 			}
 		}
 	}

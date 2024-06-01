@@ -1,10 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System;
 using UnityEngine;
 
 public class loadEmpty : loadtile
 {	
+	[Serializable]
 	private class JsonData
 	{
 	  public int seed { get; set; }
@@ -14,34 +16,39 @@ public class loadEmpty : loadtile
 	public Vector2Int pos;
 	public int seed;
 	
-	public virtual void init(Vector2Int pos){
+	public override void init(Vector2Int pos){
 		this.pos = pos;
 	}
 	
-	// We can't be modfied in any meaningful way
-	public virtual bool modified(){return false;} 
+	// We never generate(loadEmpty generates, but it does not use the normal system)
+	public override string[] spriteList(){
+		return Array.Empty<string>();
+	}
 	
-	public virtual Vector2Int getPos(){return pos;}
+	// We can't be modfied in any meaningful way
+	public override bool modified(){return false;} 
+	
+	public override Vector2Int getPos(){return pos;}
 	
 	// We have nothing to activate
-	public virtual void activate(){}
+	public override void activate(){}
 	
 	// We have nothing to deactivate
-	public virtual void deactivate(){}
+	public override void deactivate(){}
 	
 	// We generate by doing nothing
-	public virtual void generate(int seed){
+	public override void generate(int seed){
 		this.seed = seed;
 	}
 
 	// We load the seed, then call generate. This works for some basic tiles. 
-	public virtual void load(string json){
+	public override void load(string json){
 		JsonData data = JsonUtility.FromJson<JsonData>(json);
 		generate(data.seed);
 	}
 
 	// We store the seed. 
-	public virtual string stash(){
+	public override string stash(){
 		JsonData data = new JsonData();
 		data.seed = seed;
 		return JsonUtility.ToJson(data);

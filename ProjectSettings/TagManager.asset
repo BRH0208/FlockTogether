@@ -44,6 +44,9 @@ TagManager:
   - name: MASK
     uniqueID: 3543141375
     locked: 0
+  - name: HiddenFloor
+    uniqueID: 1611517507
+    locked: 0
   - name: Noise
     uniqueID: 1599325269
     locked: 0

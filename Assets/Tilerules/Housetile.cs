@@ -32,18 +32,7 @@ public class Housetile : Tile
 	};
 	
     // Not all will be valid for every map location based on surrounding roads
-	
-	// Start is called before the first frame update
-    void Start()
-    {
-        
-    }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
 	
 #if UNITY_EDITOR
 	// The following is a helper that adds a menu item to create a Housetile Asset
@@ -61,7 +50,7 @@ public class Housetile : Tile
 		// Only we get to set our transform
 		tileData.flags = TileFlags.LockTransform;
         
-		// TODO: Implement collision
+		// Collision is not done here
 		tileData.colliderType = ColliderType.None;
 		
         // We are never colored(it would reveal the grid to badly)
