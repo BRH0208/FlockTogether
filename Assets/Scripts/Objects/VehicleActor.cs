@@ -25,6 +25,9 @@ public class VehicleActor : MonoBehaviour, commandable
 	public void deselected(){
 		GP.i.selectIconEnabled(gameObject, false);
 	}
+	public Vector2 getPos(){
+		return (Vector2) transform.position;
+	}
 	
 	// Commandable entities should be able to respond to tags representing what they are
 	public bool hasTag(string tag){

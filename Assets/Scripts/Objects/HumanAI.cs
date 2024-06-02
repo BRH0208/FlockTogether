@@ -10,15 +10,15 @@ public class HumanAI : MonoBehaviour, commandable
 	
 	private PlayerInteract interact;
 	
-	public float activeSlow = 10.0f;
-	public float passiveSlow = 1.0f;
+	private float activeSlow = 200.0f;
+	private float passiveSlow = 50.0f;
 	private Rigidbody2D rb;
-	public float walkSpeed = 1.0f;
-	public float sprintMod = 1.2f;
-	public float roatationRate = 0.1f;
+	private float walkSpeed = 4.2f;
+	private float sprintMod = 2f;
+	private float roatationRate = 450f;
 	public bool isDeactive;
 	public commandable.Mode mode;
-	public float movePrecision = 0.04f;
+	private float movePrecision = 0.025f;
 	public GameObject obj{get{return gameObject;}}
 	
 	// This human was selected by a player
@@ -33,6 +33,9 @@ public class HumanAI : MonoBehaviour, commandable
 		GP.i.selectIconEnabled(gameObject, false);
 	}
 	
+	public Vector2 getPos(){
+		return (Vector2) transform.position;
+	}
 	public void commandInteractable(PlayerInteract interact,commandable.Mode mode){
 		commandEmpty(interact.gameObject.transform.position,mode); // We first move to it
 		this.interact = interact; // We set this as our interact
@@ -58,7 +61,14 @@ public class HumanAI : MonoBehaviour, commandable
 		if(tag == "hands") {return true;} // Humans can be commanded to sit in a chair
 		return false;
 	}
-	
+	public void FixedUpdate(){
+		if(hasNavGoal){
+			Vector2 relativePos = (navGoal - (Vector2) transform.position);
+			relativePos = relativePos / relativePos.magnitude;
+			rb.drag = passiveSlow;
+			rb.AddForce(relativePos * getSpeed(),ForceMode2D.Force);
+		}
+	}
 	public void Update(){
 		if(isDeactive){return;}
 		if(hasNavGoal){ // If we are currently navigating towards a position
@@ -82,11 +92,6 @@ public class HumanAI : MonoBehaviour, commandable
 					interact.inter.interact(this); // Do the interaction
 					interact = null;
 				}
-			}else{
-				// Move more
-				relativePos = relativePos / distance;
-				rb.drag = passiveSlow;
-				rb.AddForce(relativePos * getSpeed(),ForceMode2D.Force);
 			}
 		}
 		

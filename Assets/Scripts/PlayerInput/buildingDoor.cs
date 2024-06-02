@@ -8,12 +8,13 @@ public class buildingDoor : interactable
 	public float initialDir;
 	public float offset;
 	public bool inMotion;
-	public bool openDir; 
+	public int openDir; // Direction of opening, 1 for counterclockwise, -1 for clockwise
 	public bool isOpen;
 	public const float openTime = 0.5f;
 	public float timeCount; 
-	
+	private Transform interactObj;
 	void Start(){
+		interactObj = transform.Find("Collider");
 		inMotion = false;
 	}
 	void Update(){
@@ -25,9 +26,9 @@ public class buildingDoor : interactable
 			}
 			Quaternion newRotation = Quaternion.identity;
 			if(isOpen){
-				newRotation.eulerAngles = new Vector3(0,0,initialDir+90.0f * timeCount/openTime);
+				newRotation.eulerAngles = new Vector3(0,0,initialDir+openDir*90.0f * timeCount/openTime);
 			}else{
-				newRotation.eulerAngles = new Vector3(0,0,initialDir+90.0f * (1-timeCount/openTime));
+				newRotation.eulerAngles = new Vector3(0,0,initialDir+openDir*90.0f * (1-timeCount/openTime));
 			}
 			transform.rotation = newRotation;
 		}
@@ -36,6 +37,14 @@ public class buildingDoor : interactable
     public override bool interact(commandable entity){
 		if(isOpen == false){
 			initialDir = transform.rotation.eulerAngles.z;
+			
+			Vector2 relativePos = entity.getPos() -(Vector2) interactObj.position;
+			float angle = Mathf.Atan2(relativePos.y,relativePos.x);
+			if(Mathf.Sin(initialDir * Mathf.Deg2Rad- angle) > 0){
+				openDir = 1;
+			}else{
+				openDir = -1;
+			}
 		}
 		isOpen = !isOpen;
 		inMotion = true;

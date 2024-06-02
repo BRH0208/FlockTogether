@@ -40,6 +40,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "DebugSpawnZombie",
+                    "type": "Button",
+                    "id": "a8e2fd33-a783-4777-b7c1-33cc5d52d3d8",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -58,7 +67,7 @@
                     "name": "",
                     "id": "6b4d88a5-ce7d-43d5-be24-b4f319b6ae00",
                     "path": "<Mouse>/leftButton",
-                    "interactions": "SlowTap",
+                    "interactions": "Hold",
                     "processors": "",
                     "groups": "",
                     "action": "Sneak",
@@ -84,6 +93,17 @@
                     "processors": "",
                     "groups": "",
                     "action": "Select",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "483a2155-14aa-40fb-930c-bb086a1ec8ea",
+                    "path": "<Keyboard>/f",
+                    "interactions": "Tap",
+                    "processors": "",
+                    "groups": "",
+                    "action": "DebugSpawnZombie",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

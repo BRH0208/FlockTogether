@@ -9,7 +9,7 @@ public class ZombieAI : MonoBehaviour
 	public const int bufferSize = 1000;
 	public static readonly RaycastHit2D[] hitBuffer = new RaycastHit2D[bufferSize];
 	
-	public static float speed = 0.75f;
+	public static float speed = 4.00f;
 	public static float activeSlow = 30.0f;
 	public static float passiveSlow = 0.0f;
 	public static float sleepRatio = 0.1f;

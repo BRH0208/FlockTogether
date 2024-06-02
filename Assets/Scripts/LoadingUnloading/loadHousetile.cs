@@ -13,11 +13,12 @@ public class loadHousetile : loadtile
 	private static bool fileGenerated = false;
 	private Vector2Int pos;
 	private List<GameObject> managedObjects; // All of the STATIC objects associated with this house
+	private List<Collider2D> dynamicColliders; // Colliders that turn on/off when we activate/deactivate 
 		
 	// Constructor
 	public loadHousetile(){
 		if(fileGenerated == false){
-			housefile = GP.i.housefile; // TODO : This is dumb
+			housefile = GP.i.housefile; // TODO : This is dumb 
 			houseData = JsonUtility.FromJson<fileArr>(housefile.text).arr;
 			sprite_names = new List<string>();
 			// Save all house files
@@ -70,6 +71,8 @@ public class loadHousetile : loadtile
 	
 	public override void init(Vector2Int pos){
 		this.pos = pos;
+		managedObjects = new List<GameObject>();
+		dynamicColliders = new List<Collider2D>();
 	}
 	
 	public override Vector2Int getPos(){
@@ -81,25 +84,68 @@ public class loadHousetile : loadtile
 	public override bool modified(){return false;}
 	
 	// Turn on/off colliders.
-	public override void activate(){}
-	public override void deactivate(){}
+	public override void activate(){
+		foreach (Collider2D col in dynamicColliders) {
+			col.enabled = true;
+		}
+	}
+	public override void deactivate(){
+		foreach (Collider2D col in dynamicColliders) {
+			col.enabled = false;
+		}
+	}
 	
 	// Load the given data
 	// TODO: this should be a more generic class that can handle advanced structures
 	private void loadStructure(JsonHouse data){
+		float halfPixel = 0.0078125f;
 		// Manage walls
 		// TODO: Make method
-		GameObject wallObj = new GameObject();
-		wallObj.name = "Wall"+pos;
-		wallObj.layer = LayerMask.NameToLayer("OpaqueBlocker");
-		wallObj.transform.position = ((Vector3) ((Vector3Int) pos)) + new Vector3(0.5f,0.5f,0.0f);
-		wallObj.transform.rotation = worldGen.instance.layers[0].GetTransformMatrix((Vector3Int) pos).rotation;	
+		GameObject coreObj = new GameObject();
+		coreObj.name = "Obj"+pos;
+		coreObj.layer = LayerMask.NameToLayer("OpaqueBlocker");
+		coreObj.transform.position = ((Vector3) ((Vector3Int) pos)) + new Vector3(0.5f,0.5f,0.0f);
+		managedObjects.Add(coreObj);
 		foreach(JsonBox rect in data.walls){
-			BoxCollider2D collider = wallObj.AddComponent<BoxCollider2D>();
-			float halfPixel = 0.0078125f;
+			BoxCollider2D collider = coreObj.AddComponent<BoxCollider2D>();
 			collider.offset = new Vector2(halfPixel * (rect.x*2+rect.w)-0.5f,halfPixel* ((64-rect.y)*2 - 2 + rect.h)-0.5f);
 			collider.size = new Vector2(rect.w*halfPixel*2,rect.h*halfPixel*2);
+			collider.enabled = false;
+			dynamicColliders.Add(collider);
 		}
+		
+		// Manage doors
+		// TODO: Make method
+		foreach (JsonBox rect in data.doors){
+			
+			// Position door
+			GameObject doorObj = GameObject.Instantiate(GP.i.doorPrefab, ((Vector3) ((Vector3Int) pos)), Quaternion.identity);
+			doorObj.transform.parent = coreObj.transform; 
+			doorObj.transform.position += new Vector3(rect.x*2*halfPixel,(63-rect.y)*2*halfPixel,0.0f);
+			if(rect.w == 3){
+				doorObj.transform.position += new Vector3(-halfPixel,halfPixel,0.0f);
+			}
+			if(rect.h == 3){
+				doorObj.transform.position += new Vector3(halfPixel,-halfPixel,0.0f);
+				doorObj.transform.eulerAngles = new Vector3(0f,0f,90f);
+			}
+			// Find collider
+			Transform colliderContainer = doorObj.transform.Find("Collider");
+			if(colliderContainer == null){
+				Debug.LogError("Cannot find collider gameobject for door at pos "+pos);
+			}
+			Collider2D col = colliderContainer.gameObject.GetComponent<Collider2D>();
+			if(col == null){
+				Debug.LogError("Cannot find collider component for door at pos "+pos);
+			}
+			col.enabled = false;
+			
+			// Save for later
+			dynamicColliders.Add(col);
+		}
+		
+		coreObj.transform.rotation = worldGen.instance.layers[0].GetTransformMatrix((Vector3Int) pos).rotation;	
+		
 	}
 	
 	// Load a tile for the first time
@@ -137,6 +183,9 @@ public class loadHousetile : loadtile
 	
 	// Store this tile in a file
 	public override string stash(){
+		foreach (GameObject obj in managedObjects) {
+			UnityEngine.Object.Destroy(obj); // destroy the static objects
+		}
 		return "{}";
 	}
 }

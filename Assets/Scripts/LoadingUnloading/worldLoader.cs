@@ -54,9 +54,9 @@ public class worldLoader : MonoBehaviour
     }
 	
 	// Static things
-	public const int activateRange = 2; // The range at which we activate. Circular. 
-	public const int lightBoundry = 3; // The range at which we load,generate and de-activate. Circular
-	public const int heavyBoundry = 3; // The range at which we unload to file. Square
+	public const int activateRange = 3; // The range at which we activate. Circular. 
+	public const int lightBoundry = 4; // The range at which we load,generate and de-activate. Circular
+	public const int heavyBoundry = 4; // The range at which we unload to file. Square
 	// This program will assume activateRange <= lightBoundry <= heavyBoundry
 	private class rangeCounter{
 		public int activateCount;
@@ -95,6 +95,14 @@ public class worldLoader : MonoBehaviour
 	private static Dictionary<(int,int),rangeCounter> managedTiles = new Dictionary<(int,int),rangeCounter>(); 
 	private static loadtile[] loadables = null;
 	
+	// Get if a tile at the given x,y coordinates is currently activating everything in it
+	// used for dynamic spawning(like zombies)
+	public static bool getActive(int x, int y){
+		(int,int) pos = (x,y);
+		if(!managedTiles.ContainsKey(pos)) {return false;}
+		if(managedTiles[pos].activateCount > 0){return true;}
+		return false;
+	}
 	// Todo, this fails the state-limiting idea as this info is also stored across _every instance of each loadable_
 	private static Dictionary<string,loadtile> loadableDict = null;
 	// The null is so we only construct it once 
@@ -121,11 +129,9 @@ public class worldLoader : MonoBehaviour
 		// TODO: Get the primary layer a better way(GameObject.Find)
 		Sprite sprite = worldGen.instance.layers[0].GetSprite(pos);
 		if(sprite == null){return loader;} // Null tile(water) dealt with by loadEmpty
-		Debug.Log("sprite.name: "+sprite.name); // TODO: Remove
 		if(loadableDict.ContainsKey(sprite.name)){
 			loadtile desiredLoadable = loadableDict[sprite.name];
 			loader = (loadtile)Activator.CreateInstance(desiredLoadable.GetType());
-			Debug.Log(sprite.name+" loaded with "+loader.GetType());
 		}
 		
 		loader.init((Vector2Int) pos); 

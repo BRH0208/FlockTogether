@@ -85,6 +85,15 @@ public class MouseManager : MonoBehaviour
 	public void OnCommand(){
 		makeCommand(commandable.Mode.Normal);
 	}
+	public void OnDebugSpawnZombie(){
+		if(selectedObj != null){
+			ZombieManager zmanager = ZombieManager.instance;
+			for(int i = 0; i < 10; i++){
+				GameObject newZed = zmanager.spawnZombie(selectedObj.getPos().x+Random.value * 0.2f,selectedObj.getPos().y+Random.value * 0.2f);
+				newZed.GetComponent<ZombieAI>().wake(); // We are always in activation range.
+			}
+		}
+	}
 	public void OnSelect(){
 		if (commandedObjects.Count == 0){return;} // We do nothing if we aren't tracking anything
 		Vector2 mousePos = Mouse.current.position.ReadValue();

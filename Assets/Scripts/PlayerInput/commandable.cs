@@ -12,6 +12,10 @@ public interface commandable
 	// Called on select and deselect respectively
 	void selected();
 	void deselected();
+
+	// Get the commandable's position
+	// Used for orientation. Should be centered, but exact position shouldn't matter
+	Vector2 getPos();
 	
 	// Commandable entities should be able to respond to tags representing what they are
 	// Tags include "Human", "Vehicle", "Inactive" // TODO: Make this an enum

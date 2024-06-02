@@ -50,6 +50,9 @@ public class GP : MonoBehaviour
 	// Used in vehicle manger, a list of gameobject prefabs for various cars
 	public GameObject[] cars;
 	
+	// The door prefab, used in loadHousetile.cs
+	public GameObject doorPrefab;
+	
 	// Hashing Algorithm, okay for very cheap random numbers
 	public uint wang_hash(float time)
 	{

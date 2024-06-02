@@ -10,6 +10,17 @@ public class FogMesh : MonoBehaviour
 	private static RaycastHit2D[] rayBuffer;
 	private const int bufferSize = 1; // We only care about the first hit, so we have a cap of 1.
 	
+	// We swap objects layers, we keep them in list
+	public List<HashSet<GameObject>> tempVisableObjects;
+	private const int fixedUpdatesPerBuffer = 10;
+	private int fixedUpdatesCounter = 0;
+	private const int swapTimeBuffer = 3;
+	// What happends if the entire buffer is flushed before the lateUpdate?
+	// This only happens at really, really low framerates. We are allowed to flicker if the frame difference is so long
+	// 0.02 seconds * fixedUpdatesPerBuffer * swapTimeBuffer is the max flicker rate
+	// With 10 updates per buffer and 3 buffers the max flicker rate(assuming optimal bad framerate) is 1.67 per second 
+	// approximatly "three per second" is bad for epilipsy, this is well below the danger rate.
+	// https://www.epilepsy.com/stories/shedding-light-photosensitivity-one-epilepsys-most-complex-conditions-0
 	public static FogMesh instance;
 	
 	// Add a cone to be tracked by this sprite
@@ -120,17 +131,47 @@ public class FogMesh : MonoBehaviour
 		mesh  = new Mesh();
 		GetComponent<MeshFilter>().mesh = mesh;
 		rayBuffer = new RaycastHit2D[bufferSize];
+		tempVisableObjects = new List<HashSet<GameObject>>();
+		for(int i = 0; i < swapTimeBuffer; i++){
+			tempVisableObjects.Add(new HashSet<GameObject>());
+		}
 		instance = this;
+		fixedUpdatesCounter = 0;
+	}
+	
+	public void FixedUpdate(){
+		fixedUpdatesCounter++;
+		if(fixedUpdatesCounter < fixedUpdatesPerBuffer){return;}
+		fixedUpdatesCounter = 0;
+		
+		int makeVisable = LayerMask.NameToLayer("OpaqueBlocker");	
+		foreach (GameObject obj in tempVisableObjects[0]) {
+			bool noRef = true;
+			for(int i = 1; i < swapTimeBuffer; i++){
+				if(tempVisableObjects[i].Contains(obj)){
+					noRef = false;
+				}
+			}
+			if(noRef){
+				obj.layer = makeVisable; // We turn off the temporary visability
+			}
+		}
+		tempVisableObjects.Add(new HashSet<GameObject>()); // Push!
+		tempVisableObjects.RemoveAt(0); // Pop!
+		// TODO: Make this clear and cycle hashsets, make things easy on the garbage collector
+		// Because currently this creates so much garbage for the cleaner to clean
 	}
 	
 	public void LateUpdate()
     {
+		
 		if(cones == null){return;} // In rare cases, we can late update before we start.
+		int makeVisable = LayerMask.NameToLayer("OpaqueBlocker");	
 		// Don't do anything if we don't have view cones
 		if(cones.Count <= 0){
 			return;
 		}
-		
+		int tempVisible = LayerMask.NameToLayer("tempVisible");
 		int totalRays = totalRayCount();
 		Vector3[] vertices = new Vector3[totalRays + cones.Count]; // Each ray has 1 vertex, each cone has a vertex for origin
 		Vector2[] uv = new Vector2[vertices.Length]; // We have as many uv as verticies
@@ -151,11 +192,18 @@ public class FogMesh : MonoBehaviour
 			int rayNum = 0;
 			foreach (Vector2 ray in cone.getRays()){
 				Vector2 rayHit;
-				int hits = Physics2D.Raycast(cone.center,ray,fogBlocker,rayBuffer,cone.range);
-				if(hits == 0){
-					rayHit = cone.center + ray * (cone.range + 0.015625f);
+				// The most expensive line of code in this project.
+				int hits = Physics2D.Raycast(cone.center,ray,fogBlocker,rayBuffer,cone.range); 
+				if(hits == 0){ 
+					rayHit = cone.center + ray * (cone.range + 0.015625f/10);// Tenth of a pixel buffer
 				} else {
-					rayHit = cone.center + ray * (rayBuffer[0].distance + 0.015625f); // We only take the position of the first thing we hit. 
+					rayHit = cone.center + ray * (rayBuffer[0].distance + 0.015625f/10); // We only take the position of the first thing we hit. 
+					//Manage the hit. OpaqueBlockers become fully rendered
+					GameObject visObj = rayBuffer[0].transform.gameObject;
+					if(visObj.layer == makeVisable || visObj.layer == tempVisible){
+						visObj.layer = tempVisible;
+						tempVisableObjects[swapTimeBuffer-1].Add(visObj);
+					}
 				}
 				vertices[vertexIndex] = rayHit;
 				if(rayNum > 0){ // Fenceposting prevention
