@@ -45,8 +45,6 @@ public class buildingDoor : interactable
 			if(transform.eulerAngles.y == 180){
 				relativePos = new Vector2(-relativePos.x,relativePos.y);
 			}
-			// TODO: Appears to not account for flipping causing doors on some tiles to always
-			// open in the wrong direction
 			float angle = Mathf.Atan2(relativePos.y,relativePos.x);
 			if(Mathf.Sin(transform.eulerAngles.z * Mathf.Deg2Rad - angle) > 0){
 				openDir = 1;
