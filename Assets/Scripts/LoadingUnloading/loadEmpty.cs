@@ -4,53 +4,41 @@ using System.IO;
 using System;
 using UnityEngine;
 
+// A simple class used for anything that just generates once.
+// This class will still have normal calls to activate, deactivate and generate
+// But after the first time it generates, it stashes that it should not generate again.
+// Useful if it only spawns objects tracked by the ObjectManager
+// Or for tiles in which nothing truely happends. 
 public class loadEmpty : loadtile
 {	
-	[Serializable]
-	private class JsonData
-	{
-	  public int seed { get; set; }
-	}
-	
-	
-	public Vector2Int pos;
-	public int seed;
-	
-	public override void init(Vector2Int pos){
-		this.pos = pos;
-	}
+	private const string dummyJson = "{\"x\":\"x\"}"; // A bit of dummy json
+	// We don't interact with whatever we save, but if we save nothing generate
+	// will be called again on the assumption we didn't save because we didn't change
 	
 	// We never generate(loadEmpty generates, but it does not use the normal system)
 	public override string[] spriteList(){
 		return Array.Empty<string>();
 	}
 	
-	// We can't be modfied in any meaningful way
-	public override bool modified(){return false;} 
+	// While we can't be modfied in any meaningful way,
+	// We set this to true so we never generate twice
+	public override bool modified(){return true;} 
 	
-	public override Vector2Int getPos(){return pos;}
-	
-	// We have nothing to activate
+	// We generate,activate,destroy and deactivate by doing nothing
+	public override void generate(int seed){}
 	public override void activate(){}
-	
-	// We have nothing to deactivate
 	public override void deactivate(){}
+	public override void destroy(){}
 	
-	// We generate by doing nothing
-	public override void generate(int seed){
-		this.seed = seed;
-	}
-
-	// We load the seed, then call generate. This works for some basic tiles. 
+	// We will NEVER actually load
+	// Included is simple error checking
 	public override void load(string json){
-		JsonData data = JsonUtility.FromJson<JsonData>(json);
-		generate(data.seed);
+		if(json != dummyJson){
+			Debug.LogError("Empty Tile Saved Improperly");
+		}
 	}
-
-	// We store the seed. 
+	
 	public override string stash(){
-		JsonData data = new JsonData();
-		data.seed = seed;
-		return JsonUtility.ToJson(data);
+		return dummyJson;
 	}
 }

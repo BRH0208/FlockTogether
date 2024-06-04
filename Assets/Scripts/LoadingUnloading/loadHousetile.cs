@@ -8,22 +8,29 @@ using Random=UnityEngine.Random;
 public class loadHousetile : loadtile
 {
 	private TextAsset housefile;
-	private static JsonHousePrefix[] houseData;
+	private static Jload_Prefix[] houseData;
 	private static List<string> sprite_names;
+	private List<buildingDoor> controlled_doors;
+	private List<Collider2D> dynamicColliders;
 	private static bool fileGenerated = false;
-	private Vector2Int pos;
-	private List<GameObject> managedObjects; // All of the STATIC objects associated with this house
-	private List<Collider2D> dynamicColliders; // Colliders that turn on/off when we activate/deactivate 
-		
+	private const float halfPixel = 0.0078125f;
+	private int seed;
+	private GameObject houseObj; 
+	
+	public class Jsave_file
+	{
+		public int seed;
+		public string[] doors_json; 
+	}
 	// Constructor
 	public loadHousetile(){
 		if(fileGenerated == false){
 			housefile = GP.i.housefile; // TODO : This is dumb 
-			houseData = JsonUtility.FromJson<fileArr>(housefile.text).arr;
+			houseData = JsonUtility.FromJson<Jload_fileArr>(housefile.text).arr;
 			sprite_names = new List<string>();
 			// Save all house files
-			foreach (JsonHousePrefix pre in houseData) {
-				foreach (JsonHouse house in pre.data) {
+			foreach (Jload_Prefix pre in houseData) {
+				foreach (Jload_House house in pre.data) {
 					foreach (string name in house.names) {
 						sprite_names.Add(pre.prefix+name);
 					}					
@@ -34,12 +41,12 @@ public class loadHousetile : loadtile
 		}
 	}
 	[Serializable]
-	public class fileArr // Unity JsonUtility doesn't like JSON files that start as arrays, for some reason.
+	public class Jload_fileArr // Unity JsonUtility doesn't like JSON files that start as arrays, for some reason.
 	{
-	  public JsonHousePrefix[] arr;
+	  public Jload_Prefix[] arr;
 	}
 	[Serializable]
-	public class JsonBox
+	public class Jload_Box
 	{
 	  public int x;
 	  public int y;
@@ -49,20 +56,20 @@ public class loadHousetile : loadtile
 	
 	// Class used by JSON Utility
 	[Serializable]
-	public class JsonHouse
+	public class Jload_House
 	{
 	  public string[] names;
-	  public JsonBox[] garagedoors;
-	  public JsonBox[] doors;
-	  public JsonBox[] walls;
+	  public Jload_Box[] garagedoors;
+	  public Jload_Box[] doors;
+	  public Jload_Box[] walls;
 	}
 	
 	// Class used by JSON Utility
 	[Serializable]
-	public class JsonHousePrefix
+	public class Jload_Prefix
 	{
 	  public string prefix;
-	  public JsonHouse[] data;
+	  public Jload_House[] data;
 	}
 	
 	public override string[] spriteList(){
@@ -70,18 +77,20 @@ public class loadHousetile : loadtile
 	}
 	
 	public override void init(Vector2Int pos){
-		this.pos = pos;
-		managedObjects = new List<GameObject>();
+		controlled_doors = new List<buildingDoor>();
 		dynamicColliders = new List<Collider2D>();
-	}
-	
-	public override Vector2Int getPos(){
-		return pos;
+		base.init(pos);
 	}
 	
 	// Opening/Closing doors, destruction of walls, etc
-	// Currently, no modification // TODO: implement modification
-	public override bool modified(){return false;}
+	public override bool modified(){
+		foreach(buildingDoor door in controlled_doors){
+			if(door.isOpen || door.locked){
+				return true;
+			}
+		}
+		return false;
+	}
 	
 	// Turn on/off colliders.
 	public override void activate(){
@@ -96,96 +105,144 @@ public class loadHousetile : loadtile
 	}
 	
 	// Load the given data
-	// TODO: this should be a more generic class that can handle advanced structures
-	private void loadStructure(JsonHouse data){
-		float halfPixel = 0.0078125f;
+	private GameObject loadWalls(Jload_House data){
+		
 		// Manage walls
 		// TODO: Make method
 		GameObject coreObj = new GameObject();
+		Vector2 pos = getPos();
 		coreObj.name = "Obj"+pos;
 		coreObj.layer = LayerMask.NameToLayer("OpaqueBlocker");
-		coreObj.transform.position = ((Vector3) ((Vector3Int) pos)) + new Vector3(0.5f,0.5f,0.0f);
-		managedObjects.Add(coreObj);
-		foreach(JsonBox rect in data.walls){
+		coreObj.transform.position = ((Vector3) pos) + new Vector3(0.5f,0.5f,0.0f);
+		
+		foreach(Jload_Box rect in data.walls){
 			BoxCollider2D collider = coreObj.AddComponent<BoxCollider2D>();
 			collider.offset = new Vector2(halfPixel * (rect.x*2+rect.w)-0.5f,halfPixel* ((64-rect.y)*2 - 2 + rect.h)-0.5f);
 			collider.size = new Vector2(rect.w*halfPixel*2,rect.h*halfPixel*2);
 			collider.enabled = false;
 			dynamicColliders.Add(collider);
 		}
-		
+		return coreObj;
+	}
+	private void loadDoors(Jload_House data, GameObject coreObj){
 		// Manage doors
 		// TODO: Make method
-		foreach (JsonBox rect in data.doors){
+		foreach (Jload_Box rect in data.doors){
 			
 			// Position door
-			GameObject doorObj = GameObject.Instantiate(GP.i.doorPrefab, ((Vector3) ((Vector3Int) pos)), Quaternion.identity);
+			// TODO: Why the fuck is this so convoluted!?!? 17 lines jesus
+			GameObject doorObj = GameObject.Instantiate(GP.i.doorPrefab, ((Vector3) ((Vector3Int) getPos())), Quaternion.identity);
+			buildingDoor script = doorObj.GetComponent<buildingDoor>();
+			controlled_doors.Add(script);
 			doorObj.transform.parent = coreObj.transform; 
 			doorObj.transform.position += new Vector3(rect.x*2*halfPixel,(63-rect.y)*2*halfPixel,0.0f);
 			if(rect.w == 3){
 				doorObj.transform.position += new Vector3(-halfPixel,halfPixel,0.0f);
+				if(Random.Range(0.0f,1.0f) > 0.5f){
+					doorObj.transform.position += new Vector3(halfPixel * 2 * (rect.w+rect.h),0.0f,0.0f);
+					doorObj.transform.eulerAngles = new Vector3(0f,0f,180f);
+				}
 			}
 			if(rect.h == 3){
 				doorObj.transform.position += new Vector3(halfPixel,-halfPixel,0.0f);
 				doorObj.transform.eulerAngles = new Vector3(0f,0f,90f);
+				if(Random.Range(0.0f,1.0f) > 0.5f){
+					doorObj.transform.position += new Vector3(0.0f,halfPixel * 2 * (rect.w+rect.h),0.0f);
+					doorObj.transform.eulerAngles = new Vector3(0f,0f,-90f);
+				}
 			}
+			
 			// Find collider
 			Transform colliderContainer = doorObj.transform.Find("Collider");
 			if(colliderContainer == null){
-				Debug.LogError("Cannot find collider gameobject for door at pos "+pos);
+				Debug.LogError("Cannot find collider gameobject for door at pos "+getPos());
 			}
-			Collider2D col = colliderContainer.gameObject.GetComponent<Collider2D>();
+			Collider2D col = colliderContainer.GetComponent<Collider2D>();
 			if(col == null){
-				Debug.LogError("Cannot find collider component for door at pos "+pos);
+				Debug.LogError("Cannot find collider component for door at pos "+getPos());
 			}
-			col.enabled = false;
-			
-			// Save for later
 			dynamicColliders.Add(col);
+			col.enabled = false;
 		}
-		
-		coreObj.transform.rotation = worldGen.instance.layers[0].GetTransformMatrix((Vector3Int) pos).rotation;	
 		
 	}
 	
-	// Load a tile for the first time
-	public override void generate(int seed){
-		Sprite houseSprite = worldGen.instance.layers[0].GetSprite((Vector3Int) pos); // TODO: Get a new pattern for accessing permanent gameobject instances.
-		bool foundHouse = false;
-		foreach(JsonHousePrefix prefixData in houseData){
+	private Jload_House readHouseJson(){
+		Sprite houseSprite = worldGen.instance.layers[0].GetSprite((Vector3Int) getPos()); // TODO: Get a new pattern for accessing permanent gameobject instances.
+		string sprite_name = houseSprite.name;
+		foreach(Jload_Prefix prefixData in houseData){
 			string prefix = prefixData.prefix;
-			string name = houseSprite.name;
-			if(name.StartsWith(prefix)){
-				foreach (JsonHouse house in prefixData.data){
+			if(sprite_name.StartsWith(prefix)){
+				foreach (Jload_House house in prefixData.data){
 					foreach (string house_name in house.names){
-						if(prefix + house_name == name){
-							foundHouse = true;
-							loadStructure(house);
-							break;
+						if(prefix + house_name == sprite_name){
+							return house;
 						}
 					}
-					if(foundHouse){break;}
 				}
-				if(foundHouse){break;}
 			}
 		}
-		if(foundHouse == false){
-			Debug.LogError("Cannot find "+houseSprite.name+" in house json file");
-		}
+		Debug.LogError("Cannot find "+houseSprite.name+" in house json file");
+		return null;
+	}
+	// Load a tile for the first time
+	public override void generate(int seed){
+		// Load file
+		Jload_House house = readHouseJson();
+		// Create associated objects
+		this.seed = seed;
+		Random.InitState(seed); // Set the seed.
+		
+		if(houseObj != null) {Debug.LogError("House defined before generating "+getPos());}
+		houseObj = loadWalls(house);
+		loadDoors(house, houseObj);
+		
+		// Transform the house base object
+		houseObj.transform.rotation = worldGen.instance.layers[0].GetTransformMatrix((Vector3Int) getPos()).rotation;	
 	}
 
 	// Load this tile from a file. Notably, the seed is not provided
 	// If the seed is needed, it should be saved to the file. 
 	public override void load(string json){
+		// Load files
+		Jsave_file data = JsonUtility.FromJson<Jsave_file>(json);
+		Jload_House house = readHouseJson();
+		this.seed = data.seed; // Note, unused but included for consistency
+		Random.InitState(seed);
+		if(houseObj != null) {Debug.LogError("House defined before loading "+getPos());}
+		houseObj = loadWalls(house);
 		
+		// Transform the house base object
+		houseObj.transform.rotation = worldGen.instance.layers[0].GetTransformMatrix((Vector3Int) getPos()).rotation;
+		
+		// Manage doors
+		foreach (string doorJstr in data.doors_json){
+			GameObject doorObj = GameObject.Instantiate(GP.i.doorPrefab, ((Vector3) ((Vector3Int) getPos())), Quaternion.identity);
+			doorObj.transform.parent = houseObj.transform;
+			buildingDoor script = doorObj.GetComponent<buildingDoor>();
+			script.loadJson(doorJstr);
+		}
 	}
-
 	
 	// Store this tile in a file
 	public override string stash(){
-		foreach (GameObject obj in managedObjects) {
-			UnityEngine.Object.Destroy(obj); // destroy the static objects
+		// Find and save relative information
+		buildingDoor[] doorsScript = houseObj.GetComponentsInChildren<buildingDoor>(false);
+		string[] doorsJson = new string[doorsScript.Length];
+		for (int i = 0; i < doorsScript.Length; i++){
+			doorsJson[i] = doorsScript[i].saveJson();
 		}
-		return "{}";
+		// Create the JSON
+		Jsave_file data = new Jsave_file();
+		data.seed = this.seed;
+		data.doors_json = doorsJson;
+		return JsonUtility.ToJson(data);
+	}
+	
+	public override void destroy(){
+		// Destroy the object
+		if(houseObj != null) { // Its possible we were never generated. If so, we have nothing to destroy
+			UnityEngine.Object.Destroy(houseObj);
+		}
 	}
 }

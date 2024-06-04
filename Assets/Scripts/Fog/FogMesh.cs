@@ -143,9 +143,11 @@ public class FogMesh : MonoBehaviour
 		fixedUpdatesCounter++;
 		if(fixedUpdatesCounter < fixedUpdatesPerBuffer){return;}
 		fixedUpdatesCounter = 0;
-		
 		int makeVisable = LayerMask.NameToLayer("OpaqueBlocker");	
 		foreach (GameObject obj in tempVisableObjects[0]) {
+			if(obj == null){
+				continue; // This object was destroyed, we ignore it
+			}
 			bool noRef = true;
 			for(int i = 1; i < swapTimeBuffer; i++){
 				if(tempVisableObjects[i].Contains(obj)){

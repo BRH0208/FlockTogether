@@ -54,14 +54,17 @@ public class worldLoader : MonoBehaviour
     }
 	
 	// Static things
-	public const int activateRange = 3; // The range at which we activate. Circular. 
-	public const int lightBoundry = 4; // The range at which we load,generate and de-activate. Circular
-	public const int heavyBoundry = 4; // The range at which we unload to file. Square
+	private static bool debugMode = false;
+	public const int activateRange = 2; // The range at which we activate. Circular. 
+	public const int lightBoundry = 3; // The range at which we load,generate and de-activate. Circular
+	public const int heavyBoundry = 3; // The range at which we unload to file. Square
 	// This program will assume activateRange <= lightBoundry <= heavyBoundry
+	// TODO: This assumption may be more strict, more testing is required.
 	private class rangeCounter{
 		public int activateCount;
 		public int lightBoundry;
 		public int heavyBoundry;
+		public bool didSpawn; // Did the associated instance ever fall within the lightBoundry?
 		
 		public loadtile script;
 		public bool isNew;
@@ -85,6 +88,7 @@ public class worldLoader : MonoBehaviour
 			heavyBoundry_old = 0;
 			
 			isNew = true;
+			didSpawn = false;
 			this.script = script;
 		}
 		
@@ -193,30 +197,71 @@ public class worldLoader : MonoBehaviour
 			rangeCounter counter = item.Value;
 			loadtile script = counter.script;
 			Vector2Int pos = script.getPos();
+			Vector3 pos3 = (Vector3) ((Vector3Int) pos); // TODO: REMOVE
+			
+			if(debugMode) {
+				Debug.DrawLine(pos3,pos3+new Vector3(0.0f,1.0f,0.0f),Color.white);
+				Debug.DrawLine(pos3+new Vector3(0.0f,1.0f,0.0f),pos3+new Vector3(1.0f,1.0f,0.0f),Color.white);
+				Debug.DrawLine(pos3+new Vector3(1.0f,1.0f,0.0f),pos3+new Vector3(1.0f,0.0f,0.0f),Color.white);
+				Debug.DrawLine(pos3+new Vector3(1.0f,0.0f,0.0f),pos3,Color.white);
+			}
 			
 			if(counter.heavyBoundry == 0){
 				// We remove the instance
-				if(script.modified() || objMan.hasEntityInTile(pos)){
+				bool hasEntity = objMan.hasEntityInTile(pos);
+				bool tileChanged = script.modified();
+				if(tileChanged || hasEntity){
 					JsonData json = new JsonData();
-					json.objData = objMan.stash(pos);
-					json.tileData = script.stash();
+					
+					if(hasEntity){
+						json.objData = objMan.stash(pos);
+					}else{
+						json.objData = "{}";
+					}
+					
+					if(tileChanged){
+						json.tileData = script.stash();
+					}else{
+						json.tileData = "{}";
+					}
 					// Actually write to file
 					using (StreamWriter writer = new StreamWriter(fileLoc(pos), false)){
 						string data = JsonUtility.ToJson(json);
 						writer.Write(data); // TODO: Batch these operations so we have less files
 					}
 				}
+				if(debugMode) {
+					Debug.DrawLine(pos3,pos3+new Vector3(1.0f,1.0f,0.0f),Color.red,0.5f);
+					Debug.DrawLine(pos3+new Vector3(1.0f,0.0f,0.0f),pos3+new Vector3(0.0f,1.0f,0.0f),Color.red,0.5f);
+				}
+				script.destroy();
 				deleteList.Add(item.Key);
 				continue; 
 			}
-			if(counter.lightBoundry_old == 0 && counter.lightBoundry > 0){
+			if(counter.lightBoundry_old == 0 && counter.lightBoundry > 0 && counter.didSpawn == false){
+				if(debugMode) {
+					Debug.DrawLine(pos3,pos3+new Vector3(1.0f,1.0f,0.0f),Color.green,0.5f);
+					Debug.DrawLine(pos3+new Vector3(1.0f,0.0f,0.0f),pos3+new Vector3(0.0f,1.0f,0.0f),Color.green,0.5f);
+				}
+				counter.didSpawn = true;
+				
 				// Check for a save file. If it exists, load it instead of generating.
 				string filePath = fileLoc(pos);
 				if(File.Exists(filePath)){
 					string fileContents = File.ReadAllText(filePath);
 					JsonData json = JsonUtility.FromJson<JsonData>(fileContents);
-					script.load(json.tileData);
-					objMan.load(json.objData);
+					
+					// Object Manager load, if it wanted to when the file was saved.
+					if(json.objData != "{}"){
+						objMan.load(json.objData);
+					}
+					
+					// Tile Load, if it wanted to when the file was saved
+					if(json.tileData != "{}"){
+						script.load(json.tileData);
+					}else{
+						script.generate(seedGen(pos));
+					}
 				} else {
 					script.generate(seedGen(pos));
 				}
