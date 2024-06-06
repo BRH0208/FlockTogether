@@ -119,7 +119,7 @@ public class worldLoader : MonoBehaviour
 			// First time setup of dict
 			
 			// Include all loadables in this list
-			loadtile[] all_loadable = {new loadEmpty(), new loadZombietile(), new loadHousetile()};
+			loadtile[] all_loadable = {new loadEmpty(), new loadZombietile(), new loadHousetile(), new loadHospitaltile()};
 			loadables = all_loadable;
 			loadableDict = new Dictionary<string,loadtile>();
 			foreach (loadtile phantom_loader in loadables) {

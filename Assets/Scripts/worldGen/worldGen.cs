@@ -195,7 +195,7 @@ public class worldGen : MonoBehaviour
 	private Tilemap primaryLayer;
 	private Tilemap overdrawLayer;
 	private Tilemap interiorLayer;
-	
+	public TileBase hospitalTile;
 	private int minHeight = 0;
 	private int maxHeight = 0;
 	private bool inProgress = false;
@@ -240,7 +240,7 @@ public class worldGen : MonoBehaviour
 		worldGenSteps.Add(("Adding dynamic objects",createDyanmics(),0.0f)); // Add dynamic objects
 		worldGenSteps.Add(("Creating the antagonists",createOpponent(),0.0f)); // Add zombies
 		worldGenSteps.Add(("Preparing to start the game",startGame(),0.1f)); // Start the game
-		
+
 		int i = 1;
 		totalWeight = 0.0f;
 		// Count all the worldgen weights
@@ -398,38 +398,44 @@ public class worldGen : MonoBehaviour
 	}
 	
     // A test world for making sure all land tiles can be placed
-	// Places every possible 3x3 grid of tiles in sequence
+	// Places every possible 5x5 grid of tiles in sequence
 	// So long as there is a sprite for all the tiles placed in the test, 
 	// we have enough sprites for the game
-	private IEnumerator drawTest(TileBase tile){
+	private IEnumerator drawTest(){
+		TileBase tile = hospitalTile;
 		int count = 0;
 		
-		// There are 256 possibilites, we represent them in a grid
-		for(int i = 0; i < 16; i++){
-			for(int j = 0; j < 16; j++){
+		for(int i = 0; i < 181; i++){
+			stageProgress = (float) i / 181.0f;
+			yield return null;
+			for(int j = 0; j < 181; j++){
+				BoundsInt chunkBounds = new BoundsInt(i*7,j*7,0,5,5,1);
+				TileBase[] chunkTileArray = new TileBase[chunkBounds.size.x * chunkBounds.size.y];
+				int chunkArrayIndex = 0;
+				
 				// Place "center" position always
 				count++;
-				Vector3Int pos = new Vector3Int(i*4,j*4,0);
-				primaryLayer.SetTile(pos,tile);
-				
+
 				// For all other positions in a 3x3 grid around the center tile, maybe place tiles
 				int subCount = 1; // The current multiple of the count used to determine placement
-				for(int x = -1; x <= 1; x++){
-					for(int y = -1; y <= 1; y++){
+				for(int x = -2; x <= 2; x++){
+					for(int y = -2; y <= 2; y++){
 						if (x == 0 && y == 0){
-							continue; // we ignore the center tile(it was already placed)
+							chunkTileArray[chunkArrayIndex] = hospitalTile;
 						}
 						
 						subCount *= 2;
-						pos = new Vector3Int(i*4 + x,j*4 + y,0);
 						if (count % subCount < subCount / 2){ // This pattern iterates through possibilities
 							// If a tile should be made, place it
-							primaryLayer.SetTile(pos,tile);
+							chunkTileArray[chunkArrayIndex] = hospitalTile;
 						}else{
-							primaryLayer.SetTile(pos,landTile);
+							chunkTileArray[chunkArrayIndex] = landTile;
 						}
+						
+						chunkArrayIndex++;
 					}
 				}
+				primaryLayer.SetTilesBlock(chunkBounds, chunkTileArray);
 			}
 		}
 		yield return null;
@@ -1600,7 +1606,7 @@ public class worldGen : MonoBehaviour
 	private static Quaternion rotateVectorInv = Quaternion.AngleAxis(-90, Vector3.forward); 
 	
 		
-	private static Vector2Int rotateVector2Int(Vector2Int vec, bool clockwise = false){
+	public static Vector2Int rotateVector2Int(Vector2Int vec, bool clockwise = false){
 		if (clockwise) {
 		// It has to be casted around from Vector2Int to Vector3 and back
 			return (Vector2Int) Vector3Int.RoundToInt(rotateVector * (Vector3) (Vector3Int) vec);
